@@ -4,9 +4,9 @@
 #include <math.h>
 
 using namespace sf;
-
 const int H = 35;
 const int W = 30;
+RenderWindow window(VideoMode(W * 25, H * 25), "Pac-Man");
 
 std::string Mase[H] = {
     "                              ",
@@ -65,9 +65,12 @@ struct Pinky
     int x, y, nextX, nextY, score, direction, lastDirection;
 } Pinky;
 
+struct Inky
+{
+    int x, y, nextX, nextY, score, direction, lastDirection;
+} Inky;
 
 
-RenderWindow window(VideoMode(W * 25, H * 25), "Pac-Man");
 
 void PacmanMove()
 {
@@ -199,13 +202,9 @@ void BlinkyMove()
         distanceRight = distance(Pacman.x, Pacman.y, 0, Blinky.y);
     else distanceRight = distance(Pacman.x, Pacman.y, Blinky.x + 1, Blinky.y);
 
-
-
     double minDistance = INFINITY;
-
     int change=0;
-
-    if (distanceRight <= minDistance && Mase[Blinky.y][Blinky.x + 1] != 'X' && Blinky.lastDirection != 2) {
+    if (distanceRight <= minDistance && Mase[Blinky.y][Blinky.x + 1] != 'X' && Blinky.x+1!=W+1 && Blinky.lastDirection != 2) {
         minDistance = distanceRight;
         Blinky.direction = 3;
     }
@@ -213,7 +212,7 @@ void BlinkyMove()
         minDistance = distanceDown;
         Blinky.direction = 1;
     }
-    if (distanceLeft <= minDistance && Mase[Blinky.y][Blinky.x - 1] != 'X' && Blinky.lastDirection != 3) {
+    if (distanceLeft <= minDistance && Mase[Blinky.y][Blinky.x - 1] != 'X' && Blinky.x-1!=0 &&Blinky.lastDirection != 3) {
         minDistance = distanceLeft;
         Blinky.direction = 2;
     }
@@ -221,7 +220,6 @@ void BlinkyMove()
         minDistance = distanceUp;
         Blinky.direction = 0;
     }
-
 
     Blinky.score++;
     if (Blinky.score >= 200)
@@ -242,8 +240,7 @@ void BlinkyMove()
             if (Blinky.y == 17 && Blinky.x == 1)
                 Blinky.x = W - 1;
             else
-                Blinky.x--;
-            
+                Blinky.x--; 
             break;
         case 3: // Движение вправо
             if (Blinky.y == 17 && Blinky.x == W - 1)
@@ -271,7 +268,7 @@ void PinkyMove()
         y = y - 4;
         break;
     case 1:
-        y = y + 1;
+        y = y + 4;
         break;
     case 2:
         x = x - 4;
@@ -279,8 +276,6 @@ void PinkyMove()
     case 3:
         x = x + 4;
         break;
-
-
     }
 
     float distanceUp;
@@ -292,19 +287,14 @@ void PinkyMove()
     distanceDown = distance(x, y, Pinky.x, Pinky.y + 1);
     if (Pinky.y == 17 && Pinky.x == 1)
         distanceLeft = distance(x, y, W - 1, Pinky.y);
-    else distanceLeft = distance(x, y, Blinky.x - 1, Pinky.y);
+    else distanceLeft = distance(x, y, Pinky.x - 1, Pinky.y);
     if (Pinky.y == 17 && Pinky.x == W - 1)
         distanceRight = distance(x, y, 0, Pinky.y);
     else distanceRight = distance(x, y, Pinky.x + 1, Pinky.y);
-
-
-
     double minDistance = INFINITY;
     int change = 0;
 
-
-
-    if (distanceRight <= minDistance && Mase[Pinky.y][Pinky.x + 1] != 'X' && Pinky.lastDirection != 2) {
+    if (distanceRight <= minDistance && Mase[Pinky.y][Pinky.x + 1] != 'X' && Pinky.x + 1 != W - 1  && Pinky.lastDirection != 2) {
         minDistance = distanceRight;
         Pinky.direction = 3;
     }
@@ -312,7 +302,7 @@ void PinkyMove()
         minDistance = distanceUp;
         Pinky.direction = 0;
     }
-    if (distanceLeft <= minDistance && Mase[Pinky.y][Pinky.x - 1] != 'X' && Pinky.lastDirection != 3) {
+    if (distanceLeft <= minDistance && Mase[Pinky.y][Pinky.x - 1] != 'X' && Pinky.x - 1 != 0 && Pinky.lastDirection != 3) {
         minDistance = distanceLeft;
         Pinky.direction = 2;
     }
@@ -320,8 +310,6 @@ void PinkyMove()
         minDistance = distanceDown;
         Pinky.direction = 1;
     }
-
-
 
     Pinky.score++;
     if (Pinky.score >= 200)
@@ -355,9 +343,95 @@ void PinkyMove()
 
     if (Pinky.lastDirection != Pinky.direction && change)
         Pinky.lastDirection = Pinky.direction;
-
 }
 
+void InkyMove()
+{
+    int x = Pacman.x, y = Pacman.y;
+    switch (Pacman.direction)
+    {
+    case 0:
+        y = y - 2;
+        break;
+    case 1:
+        y = y + 2;
+        break;
+    case 2:
+        x = x - 2;
+        break;
+    case 3:
+        x = x + 2;
+        break;
+    }
+    x = Blinky.x+2*(x-Blinky.x);
+    y = 2*(y-Blinky.y);
+
+    float distanceUp;
+    float distanceDown;
+    float distanceLeft;
+    float distanceRight;
+
+    distanceUp = distance(x, y, Inky.x, Inky.y - 1);
+    distanceDown = distance(x, y, Inky.x, Inky.y + 1);
+    if (Inky.y == 17 && Inky.x == 1)
+        distanceLeft = distance(x, y, W - 1, Inky.y);
+    else distanceLeft = distance(x, y, Inky.x - 1, Inky.y);
+    if (Inky.y == 17 && Inky.x == W - 1)
+        distanceRight = distance(x, y, 0, Inky.y);
+    else distanceRight = distance(x, y, Inky.x + 1, Inky.y);
+    double minDistance = INFINITY;
+    int change = 0;
+
+    if (distanceRight <= minDistance && Mase[Inky.y][Inky.x + 1] != 'X' && Inky.x + 1 != W - 1 && Inky.lastDirection != 2) {
+        minDistance = distanceRight;
+        Inky.direction = 3;
+    }
+    if (distanceUp <= minDistance && Mase[Inky.y - 1][Inky.x] != 'X' && Inky.lastDirection != 1) {
+        minDistance = distanceUp;
+        Inky.direction = 0;
+    }
+    if (distanceLeft <= minDistance && Mase[Inky.y][Inky.x - 1] != 'X' && Inky.x - 1 != 0 && Inky.lastDirection != 3) {
+        minDistance = distanceLeft;
+        Inky.direction = 2;
+    }
+    if (distanceDown <= minDistance && Mase[Inky.y + 1][Inky.x] != 'X' && Inky.lastDirection != 0) {
+        minDistance = distanceDown;
+        Inky.direction = 1;
+    }
+
+    Inky.score++;
+    if (Inky.score >= 200)
+    {
+        change = 1;
+        // Двигаемся в выбранном направлении
+        switch (Inky.direction) {
+        case 0: // Движение вверх
+            Inky.y--;
+            break;
+        case 1: // Движение вниз
+            Inky.y++;
+            break;
+        case 2: // Движение влево
+            if (Inky.y == 17 && Inky.x == 1)
+                Inky.x = W - 1;
+            else
+                Inky.x--;
+            break;
+        case 3: // Движение вправо
+            if (Inky.y == 17 && Inky.x == W - 1)
+                Inky.x = 0;
+            else
+                Inky.x++;
+            break;
+        default:
+            break; // Если нет доступного направления, остаемся на месте
+        }
+        Inky.score = 0;
+    }
+
+    if (Inky.lastDirection != Inky.direction && change)
+        Inky.lastDirection = Inky.direction;
+}
 
 int main()
 {
@@ -368,7 +442,10 @@ int main()
     blinky.setPosition(13 * 25 + 3.0f, 14 * 25 + 3.0f);
     RectangleShape pinky(Vector2f(25, 25)); // Квадрат размером 25x25 пикселей
     pinky.setFillColor(Color::Magenta); // Устанавливаем синий цвет квадратика
-    pinky.setPosition(13 * 25 + 3.0f, 14 * 25 + 3.0f);
+    pinky.setPosition(14 * 25 + 3.0f, 14 * 25 + 3.0f);
+    RectangleShape inky(Vector2f(25, 25)); // Квадрат размером 25x25 пикселей
+    inky.setFillColor(Color::Cyan); // Устанавливаем синий цвет квадратика
+    inky.setPosition(15 * 25 + 3.0f, 14 * 25 + 3.0f);
     Pacman.direction = -1;
     Pacman.nextDirection = -1;
 
@@ -390,6 +467,10 @@ int main()
     Pinky.x = 14;
     Pinky.y = 14;
 
+
+    Inky.x = 15;
+    Inky.y = 14;
+
     while (window.isOpen())
     {
         Event event;
@@ -404,32 +485,18 @@ int main()
 
 
         MasePaint();
-
         PacmanMove();
         BlinkyMove();
         PinkyMove();
+        InkyMove();
 
                 window.draw(blinky); // Рисуем квадра
-
-              
-
-
-
-
-               
                 pinky.setPosition(Pinky.x * 25, Pinky.y * 25);
-
-
                 blinky.setPosition(Blinky.x * 25, Blinky.y * 25);
-
+                inky.setPosition(Inky.x * 25, Inky.y * 25);
                 window.draw(blinky); // Рисуем квадрат
                 window.draw(pinky);
-
-
-
-
-
-
+                window.draw(inky);
                 window.display(); // Обновляем окно
             }
         return 0;
