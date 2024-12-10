@@ -54,27 +54,13 @@ struct Pacman
     int x, y, nextX, nextY,score, direction, nextDirection;
 } Pacman;
 
-struct Blinky
+struct Ghost
 {
     int x, y, nextX, nextY, score, direction, lastDirection;
     double minDistance;
-} Blinky;
+};
 
-struct Pinky
-{
-    int x, y, nextX, nextY, score, direction, lastDirection;
-} Pinky;
-
-struct Inky
-{
-    int x, y, nextX, nextY, score, direction, lastDirection;
-} Inky;
-
-struct Clyde
-{
-    int x, y, nextX, nextY, score, direction, lastDirection;
-} Clyde;
-
+Ghost Blinky, Pinky, Inky, Clyde;
 
 void PacmanMove()
 {
@@ -189,77 +175,80 @@ float distance(int pacmanX, int pacmanY, int BlinkyX, int BlinkyY)
     return (sqrt(pow(pacmanX - BlinkyX, 2) + pow(pacmanY - BlinkyY, 2)));
 }
 
-
-void BlinkyMove()
+void GhostMove(Ghost& ghost, int x, int y)
 {
+
     float distanceUp;
     float distanceDown;
     float distanceLeft;
     float distanceRight;
 
-    distanceUp = distance(Pacman.x, Pacman.y, Blinky.x, Blinky.y - 1);
-    distanceDown = distance(Pacman.x, Pacman.y, Blinky.x, Blinky.y + 1);
-    if (Blinky.y == 17 && Blinky.x == 1)
-        distanceLeft = distance(Pacman.x, Pacman.y, W - 1, Blinky.y);
-    else distanceLeft = distance(Pacman.x, Pacman.y, Blinky.x - 1, Blinky.y);
-    if (Blinky.y == 17 && Blinky.x == W - 1)
-        distanceRight = distance(Pacman.x, Pacman.y, 0, Blinky.y);
-    else distanceRight = distance(Pacman.x, Pacman.y, Blinky.x + 1, Blinky.y);
-
+    distanceUp = distance(x, y, ghost.x, ghost.y - 1);
+    distanceDown = distance(x, y, ghost.x, ghost.y + 1);
+    if (ghost.y == 17 && ghost.x == 1)
+        distanceLeft = distance(x, y, W - 1, ghost.y);
+    else distanceLeft = distance(x, y, ghost.x - 1, ghost.y);
+    if (ghost.y == 17 && ghost.x == W - 1)
+        distanceRight = distance(x, y, 0, ghost.y);
+    else distanceRight = distance(x, y, ghost.x + 1, ghost.y);
     double minDistance = INFINITY;
-    int change=0;
-    if (distanceRight <= minDistance && Mase[Blinky.y][Blinky.x + 1] != 'X' && Blinky.x+1!=W+1 && Blinky.lastDirection != 2) {
+    int change = 0;
+
+    if (distanceRight <= minDistance && Mase[ghost.y][ghost.x + 1] != 'X' && ghost.x + 1 != W - 1 && ghost.lastDirection != 2) {
         minDistance = distanceRight;
-        Blinky.direction = 3;
+        ghost.direction = 3;
     }
-    if (distanceDown <= minDistance && Mase[Blinky.y + 1][Blinky.x] != 'X' && Blinky.lastDirection != 0) {
-        minDistance = distanceDown;
-        Blinky.direction = 1;
-    }
-    if (distanceLeft <= minDistance && Mase[Blinky.y][Blinky.x - 1] != 'X' && Blinky.x-1!=0 &&Blinky.lastDirection != 3) {
-        minDistance = distanceLeft;
-        Blinky.direction = 2;
-    }
-    if (distanceUp <= minDistance && Mase[Blinky.y - 1][Blinky.x] != 'X' && Blinky.lastDirection != 1) {
+    if (distanceUp <= minDistance && Mase[ghost.y - 1][ghost.x] != 'X' && ghost.lastDirection != 1) {
         minDistance = distanceUp;
-        Blinky.direction = 0;
+        ghost.direction = 0;
+    }
+    if (distanceLeft <= minDistance && Mase[ghost.y][ghost.x - 1] != 'X' && ghost.x - 1 != 0 && ghost.lastDirection != 3) {
+        minDistance = distanceLeft;
+        ghost.direction = 2;
+    }
+    if (distanceDown <= minDistance && Mase[ghost.y + 1][ghost.x] != 'X' && ghost.lastDirection != 0) {
+        minDistance = distanceDown;
+        ghost.direction = 1;
     }
 
-    Blinky.score++;
-    if (Blinky.score >= 200)
+    ghost.score++;
+    if (ghost.score >= 200)
     {
         change = 1;
         // Двигаемся в выбранном направлении
-        switch (Blinky.direction) {
+        switch (ghost.direction) {
         case 0: // Движение вверх
-            
-            Blinky.y--;
+            ghost.y--;
             break;
         case 1: // Движение вниз
-            
-            Blinky.y++;
+            ghost.y++;
             break;
         case 2: // Движение влево
-            
-            if (Blinky.y == 17 && Blinky.x == 1)
-                Blinky.x = W - 1;
+            if (ghost.y == 17 && ghost.x == 1)
+                ghost.x = W - 1;
             else
-                Blinky.x--; 
+                ghost.x--;
             break;
         case 3: // Движение вправо
-            if (Blinky.y == 17 && Blinky.x == W - 1)
-                Blinky.x = 0;
+            if (ghost.y == 17 && ghost.x == W - 1)
+                ghost.x = 0;
             else
-                Blinky.x++;
-            ;
+                ghost.x++;
             break;
         default:
             break; // Если нет доступного направления, остаемся на месте
         }
-        Blinky.score = 0;
+        ghost.score = 0;
     }
-    if (Blinky.lastDirection != Blinky.direction && change)
-        Blinky.lastDirection = Blinky.direction;
+
+    if (ghost.lastDirection != ghost.direction && change)
+        ghost.lastDirection = ghost.direction;
+}
+
+void BlinkyMove()
+{
+
+    GhostMove(Blinky, Pacman.x, Pacman.y);
 
 }
 
@@ -282,71 +271,7 @@ void PinkyMove()
         break;
     }
 
-    float distanceUp;
-    float distanceDown;
-    float distanceLeft;
-    float distanceRight;
-
-    distanceUp = distance(x, y, Pinky.x, Pinky.y - 1);
-    distanceDown = distance(x, y, Pinky.x, Pinky.y + 1);
-    if (Pinky.y == 17 && Pinky.x == 1)
-        distanceLeft = distance(x, y, W - 1, Pinky.y);
-    else distanceLeft = distance(x, y, Pinky.x - 1, Pinky.y);
-    if (Pinky.y == 17 && Pinky.x == W - 1)
-        distanceRight = distance(x, y, 0, Pinky.y);
-    else distanceRight = distance(x, y, Pinky.x + 1, Pinky.y);
-    double minDistance = INFINITY;
-    int change = 0;
-
-    if (distanceRight <= minDistance && Mase[Pinky.y][Pinky.x + 1] != 'X' && Pinky.x + 1 != W - 1  && Pinky.lastDirection != 2) {
-        minDistance = distanceRight;
-        Pinky.direction = 3;
-    }
-    if (distanceUp <= minDistance && Mase[Pinky.y - 1][Pinky.x] != 'X' && Pinky.lastDirection != 1) {
-        minDistance = distanceUp;
-        Pinky.direction = 0;
-    }
-    if (distanceLeft <= minDistance && Mase[Pinky.y][Pinky.x - 1] != 'X' && Pinky.x - 1 != 0 && Pinky.lastDirection != 3) {
-        minDistance = distanceLeft;
-        Pinky.direction = 2;
-    }
-    if (distanceDown <= minDistance && Mase[Pinky.y + 1][Pinky.x] != 'X' && Pinky.lastDirection != 0) {
-        minDistance = distanceDown;
-        Pinky.direction = 1;
-    }
-
-    Pinky.score++;
-    if (Pinky.score >= 200)
-    {
-        change = 1;
-        // Двигаемся в выбранном направлении
-        switch (Pinky.direction) {
-        case 0: // Движение вверх
-            Pinky.y--;
-            break;
-        case 1: // Движение вниз
-            Pinky.y++;
-            break;
-        case 2: // Движение влево
-            if (Pinky.y == 17 && Pinky.x == 1)
-                Pinky.x = W - 1;
-            else
-                Pinky.x--;
-            break;
-        case 3: // Движение вправо
-            if (Pinky.y == 17 && Pinky.x == W - 1)
-                Pinky.x = 0;
-            else
-                Pinky.x++;
-            break;
-        default:
-            break; // Если нет доступного направления, остаемся на месте
-        }
-        Pinky.score = 0;
-    }
-
-    if (Pinky.lastDirection != Pinky.direction && change)
-        Pinky.lastDirection = Pinky.direction;
+    GhostMove(Pinky, x, y);
 }
 
 void InkyMove()
@@ -370,71 +295,8 @@ void InkyMove()
     x = Blinky.x+2*(x-Blinky.x);
     y = 2*(y-Blinky.y);
 
-    float distanceUp;
-    float distanceDown;
-    float distanceLeft;
-    float distanceRight;
 
-    distanceUp = distance(x, y, Inky.x, Inky.y - 1);
-    distanceDown = distance(x, y, Inky.x, Inky.y + 1);
-    if (Inky.y == 17 && Inky.x == 1)
-        distanceLeft = distance(x, y, W - 1, Inky.y);
-    else distanceLeft = distance(x, y, Inky.x - 1, Inky.y);
-    if (Inky.y == 17 && Inky.x == W - 1)
-        distanceRight = distance(x, y, 0, Inky.y);
-    else distanceRight = distance(x, y, Inky.x + 1, Inky.y);
-    double minDistance = INFINITY;
-    int change = 0;
-
-    if (distanceRight <= minDistance && Mase[Inky.y][Inky.x + 1] != 'X' && Inky.x + 1 != W - 1 && Inky.lastDirection != 2) {
-        minDistance = distanceRight;
-        Inky.direction = 3;
-    }
-    if (distanceUp <= minDistance && Mase[Inky.y - 1][Inky.x] != 'X' && Inky.lastDirection != 1) {
-        minDistance = distanceUp;
-        Inky.direction = 0;
-    }
-    if (distanceLeft <= minDistance && Mase[Inky.y][Inky.x - 1] != 'X' && Inky.x - 1 != 0 && Inky.lastDirection != 3) {
-        minDistance = distanceLeft;
-        Inky.direction = 2;
-    }
-    if (distanceDown <= minDistance && Mase[Inky.y + 1][Inky.x] != 'X' && Inky.lastDirection != 0) {
-        minDistance = distanceDown;
-        Inky.direction = 1;
-    }
-
-    Inky.score++;
-    if (Inky.score >= 200)
-    {
-        change = 1;
-        // Двигаемся в выбранном направлении
-        switch (Inky.direction) {
-        case 0: // Движение вверх
-            Inky.y--;
-            break;
-        case 1: // Движение вниз
-            Inky.y++;
-            break;
-        case 2: // Движение влево
-            if (Inky.y == 17 && Inky.x == 1)
-                Inky.x = W - 1;
-            else
-                Inky.x--;
-            break;
-        case 3: // Движение вправо
-            if (Inky.y == 17 && Inky.x == W - 1)
-                Inky.x = 0;
-            else
-                Inky.x++;
-            break;
-        default:
-            break; // Если нет доступного направления, остаемся на месте
-        }
-        Inky.score = 0;
-    }
-
-    if (Inky.lastDirection != Inky.direction && change)
-        Inky.lastDirection = Inky.direction;
+    GhostMove(Inky, x, y);
 }
 
 void ClydeMove()
@@ -452,71 +314,8 @@ void ClydeMove()
         y = H;
     }
 
-    float distanceUp;
-    float distanceDown;
-    float distanceLeft;
-    float distanceRight;
 
-    distanceUp = distance(x, y, Clyde.x, Clyde.y - 1);
-    distanceDown = distance(x, y, Clyde.x, Clyde.y + 1);
-    if (Clyde.y == 17 && Clyde.x == 1)
-        distanceLeft = distance(x, y, W - 1, Clyde.y);
-    else distanceLeft = distance(x, y, Clyde.x - 1, Clyde.y);
-    if (Clyde.y == 17 && Clyde.x == W - 1)
-        distanceRight = distance(x, y, 0, Clyde.y);
-    else distanceRight = distance(x, y, Clyde.x + 1, Clyde.y);
-    double minDistance = INFINITY;
-    int change = 0;
-
-    if (distanceRight <= minDistance && Mase[Clyde.y][Clyde.x + 1] != 'X' && Clyde.x + 1 != W - 1 && Clyde.lastDirection != 2) {
-        minDistance = distanceRight;
-        Clyde.direction = 3;
-    }
-    if (distanceUp <= minDistance && Mase[Clyde.y - 1][Clyde.x] != 'X' && Clyde.lastDirection != 1) {
-        minDistance = distanceUp;
-        Clyde.direction = 0;
-    }
-    if (distanceLeft <= minDistance && Mase[Clyde.y][Clyde.x - 1] != 'X' && Clyde.x - 1 != 0 && Clyde.lastDirection != 3) {
-        minDistance = distanceLeft;
-        Clyde.direction = 2;
-    }
-    if (distanceDown <= minDistance && Mase[Clyde.y + 1][Clyde.x] != 'X' && Clyde.lastDirection != 0) {
-        minDistance = distanceDown;
-        Clyde.direction = 1;
-    }
-
-    Clyde.score++;
-    if (Clyde.score >= 200)
-    {
-        change = 1;
-        // Двигаемся в выбранном направлении
-        switch (Clyde.direction) {
-        case 0: // Движение вверх
-            Clyde.y--;
-            break;
-        case 1: // Движение вниз
-            Clyde.y++;
-            break;
-        case 2: // Движение влево
-            if (Clyde.y == 17 && Clyde.x == 1)
-                Clyde.x = W - 1;
-            else
-                Clyde.x--;
-            break;
-        case 3: // Движение вправо
-            if (Clyde.y == 17 && Clyde.x == W - 1)
-                Clyde.x = 0;
-            else
-                Clyde.x++;
-            break;
-        default:
-            break; // Если нет доступного направления, остаемся на месте
-        }
-        Clyde.score = 0;
-    }
-
-    if (Clyde.lastDirection != Clyde.direction && change)
-        Clyde.lastDirection = Clyde.direction;
+    GhostMove(Clyde, x, y);
 }
 
 int main()
@@ -576,12 +375,11 @@ int main()
 
         MasePaint();
         PacmanMove();
-        //BlinkyMove();
-        //PinkyMove();
-        //InkyMove();
+        BlinkyMove();
+        PinkyMove();
+        InkyMove();
         ClydeMove();
 
-                window.draw(blinky); // Рисуем квадра
                 pinky.setPosition(Pinky.x * 25, Pinky.y * 25);
                 blinky.setPosition(Blinky.x * 25, Blinky.y * 25);
                 inky.setPosition(Inky.x * 25, Inky.y * 25);
