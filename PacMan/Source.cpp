@@ -49,12 +49,6 @@ std::string Mase[H] = {
 
 
 
-
-
-
-
-
-
 struct Pacman
 {
     int x, y, nextX, nextY,score, direction, nextDirection;
@@ -209,58 +203,63 @@ void BlinkyMove()
 
     double minDistance = INFINITY;
 
+    int change=0;
 
     if (distanceRight <= minDistance && Mase[Blinky.y][Blinky.x + 1] != 'X' && Blinky.lastDirection != 2) {
         minDistance = distanceRight;
         Blinky.direction = 3;
     }
-    if (distanceUp <= minDistance && Mase[Blinky.y - 1][Blinky.x] != 'X' && Blinky.lastDirection != 1) {
-        minDistance = distanceUp;
-        Blinky.direction = 0;
+    if (distanceDown <= minDistance && Mase[Blinky.y + 1][Blinky.x] != 'X' && Blinky.lastDirection != 0) {
+        minDistance = distanceDown;
+        Blinky.direction = 1;
     }
     if (distanceLeft <= minDistance && Mase[Blinky.y][Blinky.x - 1] != 'X' && Blinky.lastDirection != 3) {
         minDistance = distanceLeft;
         Blinky.direction = 2;
     }
-    if (distanceDown <= minDistance && Mase[Blinky.y + 1][Blinky.x] != 'X' && Blinky.lastDirection != 0) {
-        minDistance = distanceDown;
-        Blinky.direction = 1;
-    }
-
-    if (Blinky.lastDirection != Blinky.direction)
-    {
-        Blinky.lastDirection = Blinky.direction;
+    if (distanceUp <= minDistance && Mase[Blinky.y - 1][Blinky.x] != 'X' && Blinky.lastDirection != 1) {
+        minDistance = distanceUp;
+        Blinky.direction = 0;
     }
 
 
     Blinky.score++;
     if (Blinky.score >= 200)
     {
+        change = 1;
         // Двигаемся в выбранном направлении
         switch (Blinky.direction) {
         case 0: // Движение вверх
+            
             Blinky.y--;
             break;
         case 1: // Движение вниз
+            
             Blinky.y++;
             break;
         case 2: // Движение влево
+            
             if (Blinky.y == 17 && Blinky.x == 1)
                 Blinky.x = W - 1;
             else
                 Blinky.x--;
+            
             break;
         case 3: // Движение вправо
             if (Blinky.y == 17 && Blinky.x == W - 1)
                 Blinky.x = 0;
             else
                 Blinky.x++;
+            ;
             break;
         default:
             break; // Если нет доступного направления, остаемся на месте
         }
         Blinky.score = 0;
     }
+    if (Blinky.lastDirection != Blinky.direction && change)
+        Blinky.lastDirection = Blinky.direction;
+
 }
 
 void PinkyMove()
@@ -301,7 +300,7 @@ void PinkyMove()
 
 
     double minDistance = INFINITY;
-
+    int change = 0;
 
 
 
@@ -322,15 +321,12 @@ void PinkyMove()
         Pinky.direction = 1;
     }
 
-    if (Pinky.lastDirection != Pinky.direction)
-    {
-        Pinky.lastDirection = Pinky.direction;
-    }
 
 
     Pinky.score++;
     if (Pinky.score >= 200)
     {
+        change = 1;
         // Двигаемся в выбранном направлении
         switch (Pinky.direction) {
         case 0: // Движение вверх
@@ -356,6 +352,10 @@ void PinkyMove()
         }
         Pinky.score = 0;
     }
+
+    if (Pinky.lastDirection != Pinky.direction && change)
+        Pinky.lastDirection = Pinky.direction;
+
 }
 
 
@@ -406,8 +406,8 @@ int main()
         MasePaint();
 
         PacmanMove();
-        //BlinkyMove();
-        //PinkyMove();
+        BlinkyMove();
+        PinkyMove();
 
                 window.draw(blinky); // Рисуем квадра
 
