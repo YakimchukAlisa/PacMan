@@ -70,6 +70,10 @@ struct Inky
     int x, y, nextX, nextY, score, direction, lastDirection;
 } Inky;
 
+struct Clyde
+{
+    int x, y, nextX, nextY, score, direction, lastDirection;
+} Clyde;
 
 
 void PacmanMove()
@@ -433,6 +437,88 @@ void InkyMove()
         Inky.lastDirection = Inky.direction;
 }
 
+void ClydeMove()
+{
+    int x, y;
+    float mainDistance = distance(Pacman.x, Pacman.y, Clyde.x, Clyde.y);
+    if (mainDistance > 8)
+    {
+        x = Pacman.x; 
+        y = Pacman.y;
+    }
+    else
+    {
+        x = 0;
+        y = H;
+    }
+
+    float distanceUp;
+    float distanceDown;
+    float distanceLeft;
+    float distanceRight;
+
+    distanceUp = distance(x, y, Clyde.x, Clyde.y - 1);
+    distanceDown = distance(x, y, Clyde.x, Clyde.y + 1);
+    if (Clyde.y == 17 && Clyde.x == 1)
+        distanceLeft = distance(x, y, W - 1, Clyde.y);
+    else distanceLeft = distance(x, y, Clyde.x - 1, Clyde.y);
+    if (Clyde.y == 17 && Clyde.x == W - 1)
+        distanceRight = distance(x, y, 0, Clyde.y);
+    else distanceRight = distance(x, y, Clyde.x + 1, Clyde.y);
+    double minDistance = INFINITY;
+    int change = 0;
+
+    if (distanceRight <= minDistance && Mase[Clyde.y][Clyde.x + 1] != 'X' && Clyde.x + 1 != W - 1 && Clyde.lastDirection != 2) {
+        minDistance = distanceRight;
+        Clyde.direction = 3;
+    }
+    if (distanceUp <= minDistance && Mase[Clyde.y - 1][Clyde.x] != 'X' && Clyde.lastDirection != 1) {
+        minDistance = distanceUp;
+        Clyde.direction = 0;
+    }
+    if (distanceLeft <= minDistance && Mase[Clyde.y][Clyde.x - 1] != 'X' && Clyde.x - 1 != 0 && Clyde.lastDirection != 3) {
+        minDistance = distanceLeft;
+        Clyde.direction = 2;
+    }
+    if (distanceDown <= minDistance && Mase[Clyde.y + 1][Clyde.x] != 'X' && Clyde.lastDirection != 0) {
+        minDistance = distanceDown;
+        Clyde.direction = 1;
+    }
+
+    Clyde.score++;
+    if (Clyde.score >= 200)
+    {
+        change = 1;
+        // Двигаемся в выбранном направлении
+        switch (Clyde.direction) {
+        case 0: // Движение вверх
+            Clyde.y--;
+            break;
+        case 1: // Движение вниз
+            Clyde.y++;
+            break;
+        case 2: // Движение влево
+            if (Clyde.y == 17 && Clyde.x == 1)
+                Clyde.x = W - 1;
+            else
+                Clyde.x--;
+            break;
+        case 3: // Движение вправо
+            if (Clyde.y == 17 && Clyde.x == W - 1)
+                Clyde.x = 0;
+            else
+                Clyde.x++;
+            break;
+        default:
+            break; // Если нет доступного направления, остаемся на месте
+        }
+        Clyde.score = 0;
+    }
+
+    if (Clyde.lastDirection != Clyde.direction && change)
+        Clyde.lastDirection = Clyde.direction;
+}
+
 int main()
 {
    
@@ -446,6 +532,9 @@ int main()
     RectangleShape inky(Vector2f(25, 25)); // Квадрат размером 25x25 пикселей
     inky.setFillColor(Color::Cyan); // Устанавливаем синий цвет квадратика
     inky.setPosition(15 * 25 + 3.0f, 14 * 25 + 3.0f);
+    RectangleShape clyde(Vector2f(25, 25)); // Квадрат размером 25x25 пикселей
+    clyde.setFillColor(sf::Color(255, 165, 0)); // Устанавливаем синий цвет квадратика
+    clyde.setPosition(15 * 25 + 3.0f, 14 * 25 + 3.0f);
     Pacman.direction = -1;
     Pacman.nextDirection = -1;
 
@@ -463,13 +552,14 @@ int main()
     Blinky.direction = -1;
     Blinky.lastDirection = -1;
 
-
     Pinky.x = 14;
     Pinky.y = 14;
 
-
     Inky.x = 15;
     Inky.y = 14;
+
+    Clyde.x = 16;
+    Clyde.y = 14;
 
     while (window.isOpen())
     {
@@ -486,17 +576,20 @@ int main()
 
         MasePaint();
         PacmanMove();
-        BlinkyMove();
-        PinkyMove();
-        InkyMove();
+        //BlinkyMove();
+        //PinkyMove();
+        //InkyMove();
+        ClydeMove();
 
                 window.draw(blinky); // Рисуем квадра
                 pinky.setPosition(Pinky.x * 25, Pinky.y * 25);
                 blinky.setPosition(Blinky.x * 25, Blinky.y * 25);
                 inky.setPosition(Inky.x * 25, Inky.y * 25);
+                clyde.setPosition(Clyde.x * 25, Clyde.y * 25);
                 window.draw(blinky); // Рисуем квадрат
                 window.draw(pinky);
                 window.draw(inky);
+                window.draw(clyde);
                 window.display(); // Обновляем окно
             }
         return 0;
