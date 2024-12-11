@@ -119,7 +119,10 @@ void PacmanMove()
 
     if ((Map.Mase[Pacman.nextY][Pacman.nextX] == ' ' || Map.Mase[Pacman.nextY][Pacman.nextX] == 'o' || Map.Mase[Pacman.nextY][Pacman.nextX] == 'O') && Pacman.nextY != 0 && Pacman.nextX != 0)
     {
-        
+        if (Map.Mase[Pacman.nextY][Pacman.nextX] == 'o')
+            Pacman.points += 5;
+        if (Map.Mase[Pacman.nextY][Pacman.nextX] == 'O')
+            Pacman.points += 10;
         Map.Mase[Pacman.y][Pacman.x] = ' ';
         Map.Mase[Pacman.nextY][Pacman.nextX] = 'P';
         Pacman.x = Pacman.nextX;
@@ -324,16 +327,15 @@ void ClydeMove()
 int Lose()
 {
     int f = 1;
-    if (Pacman.nextX == Blinky.x && Pacman.nextY == Blinky.y)
+    if (Pacman.x == Blinky.x && Pacman.y == Blinky.y)
         Pacman.lifes--;
-    else if (Pacman.nextX == Pinky.x && Pacman.nextY == Pinky.y)
+    else if (Pacman.x == Pinky.x && Pacman.y == Pinky.y)
         Pacman.lifes--;
-    else if (Pacman.nextX == Inky.x && Pacman.nextY == Inky.y)
+    else if (Pacman.x == Inky.x && Pacman.y == Inky.y)
         Pacman.lifes--;
-    else if (Pacman.nextX == Clyde.x && Pacman.nextY == Clyde.y)
+    else if (Pacman.x == Clyde.x && Pacman.y == Clyde.y)
         Pacman.lifes--;
     else f = 0;
-        
     return f;
 }
 
@@ -342,11 +344,13 @@ int main()
 {
 
 
+
+
     RectangleShape blinky(Vector2f(25, 25));
     blinky.setFillColor(Color::Red); 
     blinky.setPosition(13 * 25 + 3.0f, 14 * 25 + 3.0f);
     RectangleShape pinky(Vector2f(25, 25)); 
-    pinky.setFillColor(Color::Magenta);
+    pinky.setFillColor(sf::Color(255, 185, 193));
     pinky.setPosition(14 * 25 + 3.0f, 14 * 25 + 3.0f);
     RectangleShape inky(Vector2f(25, 25));
     inky.setFillColor(Color::Cyan); 
@@ -354,15 +358,35 @@ int main()
     RectangleShape clyde(Vector2f(25, 25)); 
     clyde.setFillColor(sf::Color(255, 165, 0));  
     clyde.setPosition(15 * 25 + 3.0f, 14 * 25 + 3.0f);
-    Pacman.direction = -1;
-    Pacman.nextDirection = -1;
+    Pacman.direction = 3;
+    Pacman.nextDirection = 3;
+
+
+    sf::Font font;
+    if (!font.loadFromFile("Unformital Medium.ttf")) {
+        return EXIT_FAILURE;
+    }
+    
+    sf::Text pointsText;
+    
+    pointsText.setFont(font);
+    pointsText.setCharacterSize(40);
+    pointsText.setFillColor(sf::Color::White);
+    pointsText.setPosition(2*25, 1*25);
+
+    sf::Text livesText;
+    livesText.setFont(font);
+    livesText.setCharacterSize(40);
+    livesText.setFillColor(sf::Color::White);
+    livesText.setPosition(22*25, 1*25);
+
 
     Pacman.lifes = 3;
     Pacman.nextX = 0;
     Pacman.nextY = 0;
     Pacman.x = 14;
     Pacman.y = 26;
-    Pacman.score = 0;
+    Pacman.score = 300;
 
 
     Blinky.x = 13;
@@ -389,7 +413,7 @@ int main()
             }
             window.clear(Color::Black);
 
-
+            
 
 
             MasePaint();
@@ -401,6 +425,10 @@ int main()
             ClydeMove();
 
 
+            pointsText.setString("Points " + std::to_string(Pacman.points));
+            livesText.setString("Lifes " + std::to_string(Pacman.lifes));
+            window.draw(pointsText);
+            window.draw(livesText);
 
             window.draw(blinky);
             pinky.setPosition(Pinky.x * 25, Pinky.y * 25);
@@ -411,7 +439,7 @@ int main()
             window.draw(pinky);
             window.draw(inky);
             window.draw(clyde);
-            if (int f = Lose()) {
+            if (Lose()) {
                 Blinky.x = 13;
                 Blinky.y = 14;
 
@@ -435,7 +463,6 @@ int main()
 
 
                 Pacman.score = 0;
-
 
             }
 
