@@ -8,7 +8,7 @@ using namespace sf;
 
 struct Map
 {
-    int H = 35, W = 30;
+    int H = 35, W = 30, food=10;
     std::string Mase[35] = {
         "                              ",
         "                              ",
@@ -54,17 +54,15 @@ RenderWindow window(VideoMode(Map.W * 25, Map.H * 25), "Pac-Man");
 struct Pacman
 {
     int x, y, nextX, nextY,score, direction, nextDirection, lifes, points;
-} Pacman;
+};
 
 struct Ghost
 {
     int x, y, nextX, nextY, score, direction, lastDirection;
-    double minDistance;
 };
 
-Ghost Blinky, Pinky, Inky, Clyde;
 
-void PacmanMove()
+void PacmanMove(Pacman& Pacman)
 {
     if (Keyboard::isKeyPressed(Keyboard::Up) && Map.Mase[Pacman.nextY - 1][Pacman.nextX] != 'X') {
         Pacman.nextDirection = 0;
@@ -120,9 +118,15 @@ void PacmanMove()
     if ((Map.Mase[Pacman.nextY][Pacman.nextX] == ' ' || Map.Mase[Pacman.nextY][Pacman.nextX] == 'o' || Map.Mase[Pacman.nextY][Pacman.nextX] == 'O') && Pacman.nextY != 0 && Pacman.nextX != 0)
     {
         if (Map.Mase[Pacman.nextY][Pacman.nextX] == 'o')
+        {
             Pacman.points += 5;
+            Map.food--;
+        }
         if (Map.Mase[Pacman.nextY][Pacman.nextX] == 'O')
+        {
             Pacman.points += 10;
+            Map.food--;
+        }
         Map.Mase[Pacman.y][Pacman.x] = ' ';
         Map.Mase[Pacman.nextY][Pacman.nextX] = 'P';
         Pacman.x = Pacman.nextX;
@@ -176,14 +180,13 @@ void MasePaint()
         }
 }
 
-float distance(int pacmanX, int pacmanY, int BlinkyX, int BlinkyY)
+float distance(int pacmanX, int pacmanY, int ghostX, int ghostY)
 {
-    return (sqrt(pow(pacmanX - BlinkyX, 2) + pow(pacmanY - BlinkyY, 2)));
+    return (sqrt(pow(pacmanX - ghostX, 2) + pow(pacmanY - ghostY, 2)));
 }
 
-void GhostMove(Ghost& ghost, int x, int y)
+void GhostMove(Ghost &ghost, int x, int y)
 {
-
     float distanceUp;
     float distanceDown;
     float distanceLeft;
@@ -246,19 +249,16 @@ void GhostMove(Ghost& ghost, int x, int y)
         }
         ghost.score = 0;
     }
-
     if (ghost.lastDirection != ghost.direction && change)
         ghost.lastDirection = ghost.direction;
 }
 
-void BlinkyMove()
+void BlinkyMove(Pacman Pacman, Ghost& Blinky)
 {
-
     GhostMove(Blinky, Pacman.x, Pacman.y);
-
 }
 
-void PinkyMove()
+void PinkyMove(Pacman Pacman, Ghost& Pinky)
 {
     int x=Pacman.x, y=Pacman.y;
     switch (Pacman.nextDirection)
@@ -276,11 +276,10 @@ void PinkyMove()
         x = x + 4;
         break;
     }
-
     GhostMove(Pinky, x, y);
 }
 
-void InkyMove()
+void InkyMove(Pacman Pacman, Ghost& Inky, Ghost Blinky)
 {
     int x = Pacman.x, y = Pacman.y;
     switch (Pacman.nextDirection)
@@ -299,13 +298,12 @@ void InkyMove()
         break;
     }
     x = Blinky.x+2*(x-Blinky.x);
-    y = 2*(y-Blinky.y);
-
+    y = Blinky.y+2*(y-Blinky.y);
 
     GhostMove(Inky, x, y);
 }
 
-void ClydeMove()
+void ClydeMove(Pacman Pacman, Ghost& Clyde)
 {
     int x, y;
     float mainDistance = distance(Pacman.x, Pacman.y, Clyde.x, Clyde.y);
@@ -324,7 +322,7 @@ void ClydeMove()
 
 
 
-int Lose()
+int Lose(Pacman& Pacman, Ghost Blinky, Ghost Pinky, Ghost Inky, Ghost Clyde)
 {
     int f = 1;
     if (Pacman.x == Blinky.x && Pacman.y == Blinky.y)
@@ -340,12 +338,46 @@ int Lose()
 }
 
 
+void createPacman(Pacman& Pacman) {
+    Pacman.x = 14;
+    Pacman.y = 26;
+    Pacman.nextX = 0;
+    Pacman.nextY = 0;
+    Pacman.direction = 3;
+    Pacman.nextDirection = 3;
+    Pacman.score = 0;
+    Pacman.lifes = 3;
+    Pacman.points = 0;
+}
+
+void createBlinky(Ghost& ghost)
+{
+    ghost.x = 13;
+    ghost.y = 14;
+}
+
+void createPinky(Ghost& ghost)
+{
+    ghost.x = 14;
+    ghost.y = 14;;
+}
+
+void createInky(Ghost& ghost)
+{
+    ghost.x = 15;
+    ghost.y = 14;
+}
+
+void createClyde(Ghost& ghost)
+{
+    ghost.x = 16;
+    ghost.y = 14;;
+}
+
 int main()
 {
-
-
-
-
+    Pacman Pacman;
+    Ghost Blinky, Pinky, Inky, Clyde;
     RectangleShape blinky(Vector2f(25, 25));
     blinky.setFillColor(Color::Red); 
     blinky.setPosition(13 * 25 + 3.0f, 14 * 25 + 3.0f);
@@ -358,10 +390,6 @@ int main()
     RectangleShape clyde(Vector2f(25, 25)); 
     clyde.setFillColor(sf::Color(255, 165, 0));  
     clyde.setPosition(15 * 25 + 3.0f, 14 * 25 + 3.0f);
-    Pacman.direction = 3;
-    Pacman.nextDirection = 3;
-
-
     sf::Font font;
     if (!font.loadFromFile("Unformital Medium.ttf")) {
         return EXIT_FAILURE;
@@ -380,27 +408,17 @@ int main()
     livesText.setFillColor(sf::Color::White);
     livesText.setPosition(22*25, 1*25);
 
+    sf::Text Loser;
+    Loser.setFont(font);
+    Loser.setCharacterSize(80);
+    Loser.setFillColor(sf::Color::White);
+    Loser.setPosition(5 * 25, 10 * 25);
 
-    Pacman.lifes = 3;
-    Pacman.nextX = 0;
-    Pacman.nextY = 0;
-    Pacman.x = 14;
-    Pacman.y = 26;
-    Pacman.score = 300;
-
-
-    Blinky.x = 13;
-    Blinky.y = 14;
-
-    Pinky.x = 14;
-    Pinky.y = 14;
-
-    Inky.x = 15;
-    Inky.y = 14;
-
-    Clyde.x = 16;
-    Clyde.y = 14;
-
+    createPacman(Pacman);
+    createBlinky(Blinky);
+    createPinky(Pinky);
+    createInky(Inky);
+    createClyde(Clyde);
     do
     {
         while (window.isOpen())
@@ -412,25 +430,16 @@ int main()
                     window.close();
             }
             window.clear(Color::Black);
-
-            
-
-
             MasePaint();
-            PacmanMove();
-
-            BlinkyMove();
-            PinkyMove();
-            InkyMove();
-            ClydeMove();
-
-
+            PacmanMove(Pacman);
+            BlinkyMove(Pacman, Blinky);
+            PinkyMove(Pacman,  Pinky);
+            InkyMove(Pacman, Inky, Blinky);
+            ClydeMove(Pacman, Clyde);
             pointsText.setString("Points " + std::to_string(Pacman.points));
             livesText.setString("Lifes " + std::to_string(Pacman.lifes));
             window.draw(pointsText);
             window.draw(livesText);
-
-            window.draw(blinky);
             pinky.setPosition(Pinky.x * 25, Pinky.y * 25);
             blinky.setPosition(Blinky.x * 25, Blinky.y * 25);
             inky.setPosition(Inky.x * 25, Inky.y * 25);
@@ -439,35 +448,34 @@ int main()
             window.draw(pinky);
             window.draw(inky);
             window.draw(clyde);
-            if (Lose()) {
-                Blinky.x = 13;
-                Blinky.y = 14;
-
-                Pinky.x = 14;
-                Pinky.y = 14;
-
-                Inky.x = 15;
-                Inky.y = 14;
-
-                Clyde.x = 16;
-                Clyde.y = 14;
-                Pacman.direction = -1;
-                Pacman.nextDirection = -1;
-
+            if (Lose(Pacman, Blinky, Pinky, Inky, Clyde)) 
+            {
+                createBlinky(Blinky);
+                createPinky(Pinky);
+                createInky(Inky);
+                createClyde(Clyde);
                 Map.Mase[Pacman.nextY][Pacman.nextX] = ' ';
                 Map.Mase[26][14] = 'P';
                 Pacman.nextX = 0;
                 Pacman.nextY = 0;
                 Pacman.x = 14;
                 Pacman.y = 26;
-
-
                 Pacman.score = 0;
-
+                Pacman.nextDirection = 3;
             }
-
+            if (!Map.food)
+            {
+                Loser.setString("You are win! ");
+                window.draw(Loser);
+            }
+            if (!Pacman.lifes)
+            {
+                Loser.setString("You are lose! ");
+                window.draw(Loser);
+            }
             window.display();
         }
-    } while (Pacman.lifes);
+    } while (Pacman.lifes && Map.food);
+   
     return 0;
 }
