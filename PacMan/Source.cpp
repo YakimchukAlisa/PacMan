@@ -4,10 +4,13 @@
 #include <math.h>
 
 using namespace sf;
+GameSettings* gameSettingsPtr = nullptr;
+RenderWindow window(VideoMode(30 * gameSettingsPtr->gridSize, 35 * gameSettingsPtr->gridSize), "Pac-Man");
 
 struct Food
 {
     int count, point;
+    char type;
 };
 
 struct Map
@@ -15,10 +18,28 @@ struct Map
     int H, W, countFood;
     Food bigFood, smallFood;
     std::string Mase[100];
-
 };
 
-RenderWindow window(VideoMode(30 * 25, 35 * 25), "Pac-Man");
+struct GameSettings {
+    int screenWidth;
+    int screenHeight;
+    std::string windowTitle;
+    int pacmanSize;
+    int ghostSize;
+    int foodSize;
+    sf::Color pacmanColor;
+    sf::Color squareColor;
+    sf::Color circleColor;
+    sf::Color circle2Color;
+    sf::Color blinkyColor; 
+    sf::Color pinkyColor;
+    sf::Color inkyColor;
+    sf::Color clydeColor;
+    int gridSize; 
+    int pacmanStartX;
+    int pacmanStartY;
+};
+
 
 struct Pacman
 {
@@ -84,14 +105,14 @@ void PacmanMove(Pacman& Pacman, Map& Map)
         Pacman.score = 0;
     }
 
-    if ((Map.Mase[Pacman.nextY][Pacman.nextX] == ' ' || Map.Mase[Pacman.nextY][Pacman.nextX] == 'o' || Map.Mase[Pacman.nextY][Pacman.nextX] == 'O') && Pacman.nextY != 0 && Pacman.nextX != 0)
+    if ((Map.Mase[Pacman.nextY][Pacman.nextX] == ' ' || Map.Mase[Pacman.nextY][Pacman.nextX] ==  Map.smallFood.type || Map.Mase[Pacman.nextY][Pacman.nextX] == Map.bigFood.type) && Pacman.nextY != 0 && Pacman.nextX != 0)
     {
-        if (Map.Mase[Pacman.nextY][Pacman.nextX] == 'o')
+        if (Map.Mase[Pacman.nextY][Pacman.nextX] == Map.smallFood.type)
         {
             Pacman.points += Map.smallFood.point;
             Map.smallFood.count--;
         }
-        if (Map.Mase[Pacman.nextY][Pacman.nextX] == 'O')
+        if (Map.Mase[Pacman.nextY][Pacman.nextX] == Map.bigFood.type)
         {
             Pacman.points += Map.bigFood.point;
             Map.bigFood.count--;
@@ -106,37 +127,37 @@ void PacmanMove(Pacman& Pacman, Map& Map)
 
 void MasePaint(Map Map)
 {
-    RectangleShape square(Vector2f(25, 25)); 
-    square.setFillColor(Color::Blue); 
+    RectangleShape square(Vector2f(gameSettingsPtr->gridSize, gameSettingsPtr->gridSize));
+    square.setFillColor(gameSettingsPtr->pacmanColor);
     CircleShape circle(3); 
-    circle.setFillColor(Color::White); 
+    circle.setFillColor(gameSettingsPtr->circleColor);
     CircleShape circle2(6);
-    circle2.setFillColor(Color::White); 
-    RectangleShape pacman(Vector2f(25, 25));
-    pacman.setFillColor(Color::Yellow); 
+    circle2.setFillColor(gameSettingsPtr->circle2Color);
+    RectangleShape pacman(Vector2f(gameSettingsPtr->gridSize, gameSettingsPtr->gridSize));
+    pacman.setFillColor(gameSettingsPtr->pacmanColor);
     for (int i = 0; i < Map.H; i++) 
         for (int j = 0; j < Map.W; j++) 
         {
             if (Map.Mase[i][j] == 'X')
             {
-                square.setPosition(j * 25, i * 25); 
+                square.setPosition(j * gameSettingsPtr->gridSize, i * gameSettingsPtr->gridSize);
                 window.draw(square);
             }
-            else if (Map.Mase[i][j] == 'o')
+            else if (Map.Mase[i][j] == Map.smallFood.type)
             {
                 circle.setPosition(j * 25 + 8.5, i * 25 + 8.5f);
-                int pacmanX = static_cast<int>(pacman.getPosition().y / 25);
-                int pacmanCol = static_cast<int>(pacman.getPosition().x / 25);
+                int pacmanX = static_cast<int>(pacman.getPosition().y / gameSettingsPtr->gridSize);
+                int pacmanCol = static_cast<int>(pacman.getPosition().x / gameSettingsPtr->gridSize);
                 window.draw(circle); 
             }
-            else if (Map.Mase[i][j] == 'O')
+            else if (Map.Mase[i][j] == Map.bigFood.type)
             {
-                circle2.setPosition(j * 25 + 5.5f, i * 25 + 5.5f);
+                circle2.setPosition(j * gameSettingsPtr->gridSize + 5.5f, i * gameSettingsPtr->gridSize + 5.5f);
                 window.draw(circle2);
             }
             else if (Map.Mase[i][j] == 'P')
             {
-                pacman.setPosition(j * 25, i * 25);
+                pacman.setPosition(j * gameSettingsPtr->gridSize, i * gameSettingsPtr->gridSize);
                 window.draw(pacman); 
             }
         }
@@ -263,7 +284,6 @@ void InkyMove(Pacman Pacman, Ghost& Inky, Ghost& Blinky, Map Map)
     }
     x = Blinky.x+2*(x-Blinky.x);
     y = Blinky.y+2*(y-Blinky.y);
-
     GhostMove(Inky, x, y, Map);
 }
 
@@ -284,23 +304,20 @@ void ClydeMove(Pacman Pacman, Ghost& Clyde, Map Map)
     GhostMove(Clyde, x, y, Map);
 }
 
-
-
 int Lose(Pacman& Pacman, Ghost Blinky, Ghost& Pinky, Ghost& Inky, Ghost& Clyde)
 {
     int f = 1;
-    if (Pacman.x == Blinky.x && Pacman.y == Blinky.y)
+    if ((Pacman.nextX == Blinky.x && Pacman.nextY == Blinky.y) || (Pacman.x == Blinky.x && Pacman.y == Blinky.y))
         Pacman.lives--;
-    else if (Pacman.x == Pinky.x && Pacman.y == Pinky.y)
+    else if ((Pacman.nextX == Pinky.x && Pacman.nextY == Pinky.y) || (Pacman.x == Pinky.x && Pacman.y == Pinky.y))
         Pacman.lives--;
-    else if (Pacman.x == Inky.x && Pacman.y == Inky.y)
+    else if ((Pacman.nextX == Inky.x && Pacman.nextY == Inky.y) || (Pacman.x == Inky.x && Pacman.y == Inky.y))
         Pacman.lives--;
-    else if (Pacman.x == Clyde.x && Pacman.y == Clyde.y)
+    else if ((Pacman.nextX == Clyde.x && Pacman.nextY == Clyde.y) || (Pacman.x == Clyde.x && Pacman.y == Clyde.y))
         Pacman.lives--;
     else f = 0;
     return f;
 }
-
 
 void createPacman(Pacman& Pacman) {
     Pacman.x = 14;
@@ -342,14 +359,26 @@ void createClyde(Ghost& ghost)
     ghost.score = 0;
 }
 
-void createMap(Map& map)
+void createsmallFood(Food& smallFood)
+{
+    smallFood.count = 240;
+    smallFood.point = 5;
+    smallFood.type = 'o';
+}
+
+void createbigFood(Food& bigFood)
+{
+    bigFood.count = 4;
+    bigFood.point = 10;
+    bigFood.type = 'O';
+}
+
+void createMap(Map& map, Food smallFood, Food bigFood)
 {
     map.H = 35;
     map.W = 30;
-    map.smallFood.count = 200;
-    map.bigFood.point = 10;
-    map.bigFood.count = 4;
-    map.smallFood.point = 5;
+    map.smallFood = smallFood;
+    map.bigFood = bigFood;
     std::string tempMase[100] = {
         "                              ",
             "                              ",
@@ -390,50 +419,88 @@ void createMap(Map& map)
     for (int i = 0; i < 100; ++i) {
         map.Mase[i] = tempMase[i];
     }
-  
+}
+
+void createGameSettings(GameSettings*& gameSettingsPtr)
+{
+    gameSettingsPtr = new GameSettings;
+    gameSettingsPtr->screenWidth = 800;
+    gameSettingsPtr->screenHeight = 600;
+    gameSettingsPtr->windowTitle = "Pac-Man";
+    gameSettingsPtr->pacmanSize = 20;
+    gameSettingsPtr->ghostSize = 18;
+    gameSettingsPtr->foodSize = 10;
+    gameSettingsPtr->pacmanColor = sf::Color::Yellow;
+    gameSettingsPtr->squareColor = sf::Color::Blue;
+    gameSettingsPtr->circleColor = sf::Color::White;
+    gameSettingsPtr->circle2Color = sf::Color::White;
+    gameSettingsPtr->blinkyColor = sf::Color::Red;
+    gameSettingsPtr->pinkyColor = sf::Color(255, 185, 193);
+    gameSettingsPtr->inkyColor = sf::Color::Cyan;
+    gameSettingsPtr->clydeColor = sf::Color(255, 165, 0);
+    gameSettingsPtr->gridSize = 25; 
+    gameSettingsPtr->pacmanStartX = 14;
+    gameSettingsPtr->pacmanStartY = 26;
+}
+
+int WonOrLost(Pacman Pacman, Map Map, Text& Result)
+{
+    int f = 1;
+    if (!(Map.smallFood.count + Map.bigFood.count))
+        Result.setString("You won! ");
+    else if ((!Pacman.lives))
+        Result.setString("You lost! ");
+    else f = 0;
+    return f;
 }
 
 int main()
 {
+
     Pacman Pacman;
     Ghost Blinky, Pinky, Inky, Clyde;
     Map Map;
-    RectangleShape blinky(Vector2f(25, 25));
-    blinky.setFillColor(Color::Red); 
- 
-    RectangleShape pinky(Vector2f(25, 25)); 
-    pinky.setFillColor(sf::Color(255, 185, 193));
- 
-    RectangleShape inky(Vector2f(25, 25));
-    inky.setFillColor(Color::Cyan); 
+    Food bigFood, smallFood;
 
-    RectangleShape clyde(Vector2f(25, 25)); 
-    clyde.setFillColor(sf::Color(255, 165, 0));  
+    createGameSettings(gameSettingsPtr);
+    RectangleShape blinky(Vector2f(gameSettingsPtr->gridSize, gameSettingsPtr->gridSize));
+    blinky.setFillColor(gameSettingsPtr->blinkyColor);
+ 
+    RectangleShape pinky(Vector2f(gameSettingsPtr->gridSize, gameSettingsPtr->gridSize));
+    pinky.setFillColor(gameSettingsPtr->pinkyColor);
+ 
+    RectangleShape inky(Vector2f(gameSettingsPtr->gridSize, gameSettingsPtr->gridSize));
+    inky.setFillColor(gameSettingsPtr->inkyColor);
+
+    RectangleShape clyde(Vector2f(gameSettingsPtr->gridSize, gameSettingsPtr->gridSize));
+    clyde.setFillColor(gameSettingsPtr->clydeColor);
  
     sf::Font font;
     if (!font.loadFromFile("Unformital Medium.ttf")) {
         return EXIT_FAILURE;
     }
-    
     sf::Text pointsText;
     pointsText.setFont(font);
     pointsText.setCharacterSize(40);
     pointsText.setFillColor(sf::Color::White);
-    pointsText.setPosition(2*25, 1*25);
+    pointsText.setPosition(2* gameSettingsPtr->gridSize, 1* gameSettingsPtr->gridSize);
 
     sf::Text livesText;
     livesText.setFont(font);
     livesText.setCharacterSize(40);
     livesText.setFillColor(sf::Color::White);
-    livesText.setPosition(22*25, 1*25);
+    livesText.setPosition(22* gameSettingsPtr->gridSize, 1* gameSettingsPtr->gridSize);
 
     sf::Text Result;
     Result.setFont(font);
     Result.setCharacterSize(80);
     Result.setFillColor(sf::Color::White);
-    Result.setPosition(5 * 25, 10 * 25);
+    Result.setPosition(5 * gameSettingsPtr->gridSize, 10 * gameSettingsPtr->gridSize);
   
-    createMap(Map);
+
+    createbigFood(bigFood);
+    createsmallFood(smallFood);
+    createMap(Map, smallFood, bigFood);
     createPacman(Pacman);
     createBlinky(Blinky);
     createPinky(Pinky);
@@ -450,7 +517,7 @@ int main()
             }
             window.clear(Color::Black);
             MasePaint(Map);
-            if (Pacman.lives && Map.smallFood.count && Map.bigFood.count)
+            if (!(WonOrLost(Pacman, Map, Result)))
             {
                 PacmanMove(Pacman, Map);
                 BlinkyMove(Pacman, Blinky, Map);
@@ -461,10 +528,10 @@ int main()
                 livesText.setString("Lives " + std::to_string(Pacman.lives));
                 window.draw(pointsText);
                 window.draw(livesText);
-                pinky.setPosition(Pinky.x * 25, Pinky.y * 25);
-                blinky.setPosition(Blinky.x * 25, Blinky.y * 25);
-                inky.setPosition(Inky.x * 25, Inky.y * 25);
-                clyde.setPosition(Clyde.x * 25, Clyde.y * 25);
+                pinky.setPosition(Pinky.x * gameSettingsPtr->gridSize, Pinky.y * gameSettingsPtr->gridSize);
+                blinky.setPosition(Blinky.x * gameSettingsPtr->gridSize, Blinky.y * gameSettingsPtr->gridSize);
+                inky.setPosition(Inky.x * gameSettingsPtr->gridSize, Inky.y * gameSettingsPtr->gridSize);
+                clyde.setPosition(Clyde.x * gameSettingsPtr->gridSize, Clyde.y * gameSettingsPtr->gridSize);
                 window.draw(blinky);
                 window.draw(pinky);
                 window.draw(inky);
@@ -479,22 +546,13 @@ int main()
                     Map.Mase[26][14] = 'P';
                     Pacman.nextX = 0;
                     Pacman.nextY = 0;
-                    Pacman.x = 14;
-                    Pacman.y = 26;
+                    Pacman.x = gameSettingsPtr->pacmanStartX;
+                    Pacman.y = gameSettingsPtr->pacmanStartY;
                     Pacman.score = 0;
                     Pacman.nextDirection = 3;
                 }
-                if (!(Map.smallFood.count+Map.bigFood.count))
+                if (WonOrLost(Pacman, Map, Result))
                 {
-                    Result.setString("You won! ");
-                    sf::FloatRect textBounds = Result.getLocalBounds();
-                    sf::Vector2u windowSize = window.getSize();
-                    Result.setPosition((windowSize.x - textBounds.width) / 2, (windowSize.y - textBounds.height) / 2 - 50);
-                    window.draw(Result);
-                }
-                if (!Pacman.lives)
-                {
-                    Result.setString("You lost! ");
                     sf::FloatRect textBounds = Result.getLocalBounds();
                     sf::Vector2u windowSize = window.getSize();
                     Result.setPosition((windowSize.x - textBounds.width) / 2, (windowSize.y - textBounds.height) / 2 -50);
