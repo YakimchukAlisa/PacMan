@@ -4,8 +4,8 @@
 #include <math.h>
 
 using namespace sf;
-GameSettings* gameSettingsPtr = nullptr;
-RenderWindow window(VideoMode(30 * gameSettingsPtr->gridSize, 35 * gameSettingsPtr->gridSize), "Pac-Man");
+
+
 
 struct Food
 {
@@ -39,6 +39,8 @@ struct GameSettings {
     int pacmanStartX;
     int pacmanStartY;
 };
+
+GameSettings* gameSettingsPtr = nullptr;
 
 
 struct Pacman
@@ -125,10 +127,10 @@ void PacmanMove(Pacman& Pacman, Map& Map)
 }
 
 
-void MasePaint(Map Map)
+void MasePaint(Map Map, RenderWindow& window)
 {
     RectangleShape square(Vector2f(gameSettingsPtr->gridSize, gameSettingsPtr->gridSize));
-    square.setFillColor(gameSettingsPtr->pacmanColor);
+    square.setFillColor(gameSettingsPtr->squareColor);
     CircleShape circle(3); 
     circle.setFillColor(gameSettingsPtr->circleColor);
     CircleShape circle2(6);
@@ -145,7 +147,7 @@ void MasePaint(Map Map)
             }
             else if (Map.Mase[i][j] == Map.smallFood.type)
             {
-                circle.setPosition(j * 25 + 8.5, i * 25 + 8.5f);
+                circle.setPosition(j * gameSettingsPtr->gridSize + 8.5, i * gameSettingsPtr->gridSize + 8.5f);
                 int pacmanX = static_cast<int>(pacman.getPosition().y / gameSettingsPtr->gridSize);
                 int pacmanCol = static_cast<int>(pacman.getPosition().x / gameSettingsPtr->gridSize);
                 window.draw(circle); 
@@ -421,7 +423,7 @@ void createMap(Map& map, Food smallFood, Food bigFood)
     }
 }
 
-void createGameSettings(GameSettings*& gameSettingsPtr)
+void createGameSettings()
 {
     gameSettingsPtr = new GameSettings;
     gameSettingsPtr->screenWidth = 800;
@@ -456,13 +458,13 @@ int WonOrLost(Pacman Pacman, Map Map, Text& Result)
 
 int main()
 {
-
+    createGameSettings();
+    RenderWindow window(VideoMode(30 * gameSettingsPtr->gridSize, 35 * gameSettingsPtr->gridSize), "Pac-Man");
     Pacman Pacman;
     Ghost Blinky, Pinky, Inky, Clyde;
     Map Map;
     Food bigFood, smallFood;
 
-    createGameSettings(gameSettingsPtr);
     RectangleShape blinky(Vector2f(gameSettingsPtr->gridSize, gameSettingsPtr->gridSize));
     blinky.setFillColor(gameSettingsPtr->blinkyColor);
  
@@ -497,7 +499,6 @@ int main()
     Result.setFillColor(sf::Color::White);
     Result.setPosition(5 * gameSettingsPtr->gridSize, 10 * gameSettingsPtr->gridSize);
   
-
     createbigFood(bigFood);
     createsmallFood(smallFood);
     createMap(Map, smallFood, bigFood);
@@ -516,7 +517,7 @@ int main()
                     window.close();
             }
             window.clear(Color::Black);
-            MasePaint(Map);
+            MasePaint(Map, window);
             if (!(WonOrLost(Pacman, Map, Result)))
             {
                 PacmanMove(Pacman, Map);
