@@ -8,48 +8,12 @@ using namespace sf;
 
 struct Map
 {
-    int H = 35, W = 30, food=10;
-    std::string Mase[35] = {
-        "                              ",
-        "                              ",
-        "                              ",
-        " XXXXXXXXXXXXXXXXXXXXXXXXXXXX ",
-        " XooooooooooooXXooooooooooooX ",
-        " XoXXXXoXXXXXoXXoXXXXXoXXXXoX ",
-        " XOXXXXoXXXXXoXXoXXXXXoXXXXOX ",
-        " XoXXXXoXXXXXoXXoXXXXXoXXXXoX ",
-        " XooooooooooooooooooooooooooX ",
-        " XoXXXXoXXoXXXXXXXXoXXoXXXXoX ",
-        " XoXXXXoXXoXXXXXXXXoXXoXXXXoX ",
-        " XooooooXXooooXXooooXXooooooX ",
-        " XXXXXXoXXXXX XX XXXXXoXXXXXX ",
-        "      XoXXXXX XX XXXXXoX      ",
-        "      XoXX          XXoX      ",
-        "      XoXX XXXXXXXX XXoX      ",
-        " XXXXXXoXX X      X XXoXXXXXX ",
-        "       o   X      X   o       ",
-        " XXXXXXoXX X      X XXoXXXXXX ",
-        "      XoXX XXXXXXXX XXoX      ",
-        "      XoXX          XXoX      ",
-        "      XoXX XXXXXXXX XXoX      ",
-        " XXXXXXoXX XXXXXXXX XXoXXXXXX ",
-        " XooooooooooooXXooooooooooooX ",
-        " XoXXXXoXXXXXoXXoXXXXXoXXXXoX ",
-        " XoXXXXoXXXXXoXXoXXXXXoXXXXoX ",
-        " XOooXXoooooooPooooooooXXooOX ",
-        " XXXoXXoXXoXXXXXXXXoXXoXXoXXX ",
-        " XXXoXXoXXoXXXXXXXXoXXoXXoXXX ",
-        " XooooooXXooooXXooooXXooooooX ",
-        " XoXXXXXXXXXXoXXoXXXXXXXXXXoX ",
-        " XoXXXXXXXXXXoXXoXXXXXXXXXXoX ",
-        " XooooooooooooooooooooooooooX ",
-        " XXXXXXXXXXXXXXXXXXXXXXXXXXXX ",
-        "                              ",
-    };
-}
-Map;
+    int H, W, food;
+    std::string Mase[100];
 
-RenderWindow window(VideoMode(Map.W * 25, Map.H * 25), "Pac-Man");
+};
+
+RenderWindow window(VideoMode(30 * 25, 35 * 25), "Pac-Man");
 
 struct Pacman
 {
@@ -62,24 +26,24 @@ struct Ghost
 };
 
 
-void PacmanMove(Pacman& Pacman)
+void PacmanMove(Pacman& Pacman, Map& Map)
 {
-    if (Keyboard::isKeyPressed(Keyboard::Up) && Map.Mase[Pacman.nextY - 1][Pacman.nextX] != 'X') {
+    if (Keyboard::isKeyPressed(Keyboard::Up) && Map.Mase[Pacman.nextY - 1][Pacman.nextX] != 'X' && !(Pacman.nextY == 17 && Pacman.nextX == 0 || Pacman.nextY == 17 && Pacman.nextX == Map.W-1)) {
         Pacman.nextDirection = 0;
         Pacman.nextX = Pacman.x;
         Pacman.nextY = Pacman.y;
     }
-    if (Keyboard::isKeyPressed(Keyboard::Down) && Map.Mase[Pacman.nextY + 1][Pacman.nextX] != 'X') {
+    if (Keyboard::isKeyPressed(Keyboard::Down) && Map.Mase[Pacman.nextY + 1][Pacman.nextX] != 'X' && !(Pacman.nextY == 17 && Pacman.nextX == 0 || Pacman.nextY == 17 && Pacman.nextX == Map.W - 1)) {
         Pacman.nextDirection = 1;
         Pacman.nextX = Pacman.x;
         Pacman.nextY = Pacman.y;
     }
-    if (Keyboard::isKeyPressed(Keyboard::Left) && (Map.Mase[Pacman.nextY][Pacman.nextX - 1] != 'X' || (Pacman.nextY == 17 && Pacman.nextX == 0))) {
+    if (Keyboard::isKeyPressed(Keyboard::Left) && (Map.Mase[Pacman.nextY][Pacman.nextX - 1] != 'X' )) {
         Pacman.nextDirection = 2;
         Pacman.nextX = Pacman.x;
         Pacman.nextY = Pacman.y;
     }
-    if (Keyboard::isKeyPressed(Keyboard::Right) && (Map.Mase[Pacman.nextY][Pacman.nextX + 1] != 'X'|| (Pacman.nextY == 17 && Pacman.nextX == Map.W - 1))) {
+    if (Keyboard::isKeyPressed(Keyboard::Right) && (Map.Mase[Pacman.nextY][Pacman.nextX + 1] != 'X')) {
         Pacman.nextDirection = 3;
         Pacman.nextX = Pacman.x;
         Pacman.nextY = Pacman.y;
@@ -100,14 +64,14 @@ void PacmanMove(Pacman& Pacman)
                 Pacman.nextY++;
             break;
         case 2:
-            if (Pacman.nextY == 17 && Pacman.nextX == 0)
-                Pacman.nextX = Map.W - 1;
+            if (Pacman.nextY == 17 && Pacman.nextX == 1)
+                Pacman.nextX = Map.W - 2;
             else if (Map.Mase[Pacman.nextY][Pacman.nextX - 1] != 'X' && Pacman.nextX - 1 >= 0)
                 Pacman.nextX--;
             break;
         case 3:
-            if (Pacman.nextY == 17 && Pacman.nextX == Map.W - 1)
-                Pacman.nextX = 0;
+            if (Pacman.nextY == 17 && Pacman.nextX == Map.W - 2)
+                Pacman.nextX = 1;
             else if (Map.Mase[Pacman.nextY][Pacman.nextX + 1] != 'X' && Pacman.nextX + 1 <= 35)
                 Pacman.nextX++;
             break;
@@ -135,17 +99,15 @@ void PacmanMove(Pacman& Pacman)
 }
 
 
-void MasePaint()
+void MasePaint(Map Map)
 {
     
     RectangleShape square(Vector2f(25, 25)); // Квадрат размером 25x25 пикселей
     square.setFillColor(Color::Blue); // Устанавливаем синий цвет квадратика
     CircleShape circle(3); // Квадрат размером 25x25 пикселей
-    circle.setFillColor(Color::White); // Устанавливаем синий цвет квадратика
-    //circle.setOrigin(10, 10);
+    circle.setFillColor(Color::White); // Устанавливаем синий цвет квадратика);
     CircleShape circle2(6); // Квадрат размером 25x25 пикселей
     circle2.setFillColor(Color::White); // Устанавливаем синий цвет квадратика
-    //circle2.setOrigin(10, 10);
     RectangleShape pacman(Vector2f(25, 25)); // Квадрат размером 25x25 пикселей
     pacman.setFillColor(Color::Yellow); // Устанавливаем синий цвет квадратика
     for (int i = 0; i < Map.H; i++) // 11 - количество строк
@@ -185,8 +147,9 @@ float distance(int pacmanX, int pacmanY, int ghostX, int ghostY)
     return (sqrt(pow(pacmanX - ghostX, 2) + pow(pacmanY - ghostY, 2)));
 }
 
-void GhostMove(Ghost &ghost, int x, int y)
+void GhostMove(Ghost& ghost, int x, int y, Map Map)
 {
+
     float distanceUp;
     float distanceDown;
     float distanceLeft;
@@ -203,19 +166,19 @@ void GhostMove(Ghost &ghost, int x, int y)
     double minDistance = INFINITY;
     int change = 0;
 
-    if (distanceRight <= minDistance && Map.Mase[ghost.y][ghost.x + 1] != 'X' && ghost.x + 1 != Map.W - 1 && ghost.lastDirection != 2) {
+    if (distanceRight <= minDistance && Map.Mase[ghost.y][ghost.x + 1] != 'X'   && ghost.lastDirection != 2) {
         minDistance = distanceRight;
         ghost.direction = 3;
     }
-    if (distanceUp <= minDistance && Map.Mase[ghost.y - 1][ghost.x] != 'X' && ghost.lastDirection != 1) {
+    if (distanceUp <= minDistance && Map.Mase[ghost.y - 1][ghost.x] != 'X' && ghost.lastDirection != 1 && !(ghost.y==17 && ghost.x==0 || ghost.y == 17 && ghost.x == Map.W  - 1)) {
         minDistance = distanceUp;
         ghost.direction = 0;
     }
-    if (distanceLeft <= minDistance && Map.Mase[ghost.y][ghost.x - 1] != 'X' && ghost.x - 1 != 0 && ghost.lastDirection != 3) {
+    if (distanceLeft <= minDistance && Map.Mase[ghost.y][ghost.x - 1] != 'X' && ghost.lastDirection != 3) {
         minDistance = distanceLeft;
         ghost.direction = 2;
     }
-    if (distanceDown <= minDistance && Map.Mase[ghost.y + 1][ghost.x] != 'X' && ghost.lastDirection != 0) {
+    if (distanceDown <= minDistance && Map.Mase[ghost.y + 1][ghost.x] != 'X' && ghost.lastDirection != 0 && !(ghost.y == 17 && ghost.x == 0 || ghost.y == 17 && ghost.x == Map.W - 1)) {
         minDistance = distanceDown;
         ghost.direction = 1;
     }
@@ -234,13 +197,13 @@ void GhostMove(Ghost &ghost, int x, int y)
             break;
         case 2: // Движение влево
             if (ghost.y == 17 && ghost.x == 1)
-                ghost.x = Map.W - 1;
+                ghost.x = Map.W - 2;
             else
                 ghost.x--;
             break;
         case 3: // Движение вправо
-            if (ghost.y == 17 && ghost.x == Map.W - 1)
-                ghost.x = 0;
+            if (ghost.y == 17 && ghost.x == Map.W - 2)
+                ghost.x = 1;
             else
                 ghost.x++;
             break;
@@ -249,16 +212,17 @@ void GhostMove(Ghost &ghost, int x, int y)
         }
         ghost.score = 0;
     }
+
     if (ghost.lastDirection != ghost.direction && change)
         ghost.lastDirection = ghost.direction;
 }
 
-void BlinkyMove(Pacman Pacman, Ghost& Blinky)
+void BlinkyMove(Pacman Pacman, Ghost& Blinky, Map Map)
 {
-    GhostMove(Blinky, Pacman.x, Pacman.y);
+    GhostMove(Blinky, Pacman.x, Pacman.y, Map);
 }
 
-void PinkyMove(Pacman Pacman, Ghost& Pinky)
+void PinkyMove(Pacman Pacman, Ghost& Pinky, Map Map)
 {
     int x=Pacman.x, y=Pacman.y;
     switch (Pacman.nextDirection)
@@ -276,10 +240,10 @@ void PinkyMove(Pacman Pacman, Ghost& Pinky)
         x = x + 4;
         break;
     }
-    GhostMove(Pinky, x, y);
+    GhostMove(Pinky, x, y, Map);
 }
 
-void InkyMove(Pacman Pacman, Ghost& Inky, Ghost Blinky)
+void InkyMove(Pacman Pacman, Ghost& Inky, Ghost& Blinky, Map Map)
 {
     int x = Pacman.x, y = Pacman.y;
     switch (Pacman.nextDirection)
@@ -300,10 +264,10 @@ void InkyMove(Pacman Pacman, Ghost& Inky, Ghost Blinky)
     x = Blinky.x+2*(x-Blinky.x);
     y = Blinky.y+2*(y-Blinky.y);
 
-    GhostMove(Inky, x, y);
+    GhostMove(Inky, x, y, Map);
 }
 
-void ClydeMove(Pacman Pacman, Ghost& Clyde)
+void ClydeMove(Pacman Pacman, Ghost& Clyde, Map Map)
 {
     int x, y;
     float mainDistance = distance(Pacman.x, Pacman.y, Clyde.x, Clyde.y);
@@ -317,12 +281,12 @@ void ClydeMove(Pacman Pacman, Ghost& Clyde)
         x = 0;
         y = Map.H;
     }
-    GhostMove(Clyde, x, y);
+    GhostMove(Clyde, x, y, Map);
 }
 
 
 
-int Lose(Pacman& Pacman, Ghost Blinky, Ghost Pinky, Ghost Inky, Ghost Clyde)
+int Lose(Pacman& Pacman, Ghost Blinky, Ghost& Pinky, Ghost& Inky, Ghost& Clyde)
 {
     int f = 1;
     if (Pacman.x == Blinky.x && Pacman.y == Blinky.y)
@@ -354,42 +318,95 @@ void createBlinky(Ghost& ghost)
 {
     ghost.x = 13;
     ghost.y = 14;
+    ghost.score = 0;
 }
 
 void createPinky(Ghost& ghost)
 {
     ghost.x = 14;
     ghost.y = 14;;
+    ghost.score = 0;
 }
 
 void createInky(Ghost& ghost)
 {
     ghost.x = 15;
     ghost.y = 14;
+    ghost.score = 0;
 }
 
 void createClyde(Ghost& ghost)
 {
     ghost.x = 16;
-    ghost.y = 14;;
+    ghost.y = 14;
+    ghost.score = 0;
+}
+
+void createMap(Map& map)
+{
+    map.H = 35;
+    map.W = 30;
+    map.food = 244;
+    std::string tempMase[100] = {
+        "                              ",
+            "                              ",
+            "                              ",
+            " XXXXXXXXXXXXXXXXXXXXXXXXXXXX ",
+            " XooooooooooooXXooooooooooooX ",
+            " XoXXXXoXXXXXoXXoXXXXXoXXXXoX ",
+            " XOXXXXoXXXXXoXXoXXXXXoXXXXOX ",
+            " XoXXXXoXXXXXoXXoXXXXXoXXXXoX ",
+            " XooooooooooooooooooooooooooX ",
+            " XoXXXXoXXoXXXXXXXXoXXoXXXXoX ",
+            " XoXXXXoXXoXXXXXXXXoXXoXXXXoX ",
+            " XooooooXXooooXXooooXXooooooX ",
+            " XXXXXXoXXXXX XX XXXXXoXXXXXX ",
+            "      XoXXXXX XX XXXXXoX      ",
+            "      XoXX          XXoX      ",
+            "      XoXX XXXXXXXX XXoX      ",
+            " XXXXXXoXX X      X XXoXXXXXX ",
+            "       o   X      X   o       ",
+            " XXXXXXoXX X      X XXoXXXXXX ",
+            "      XoXX XXXXXXXX XXoX      ",
+            "      XoXX          XXoX      ",
+            "      XoXX XXXXXXXX XXoX      ",
+            " XXXXXXoXX XXXXXXXX XXoXXXXXX ",
+            " XooooooooooooXXooooooooooooX ",
+            " XoXXXXoXXXXXoXXoXXXXXoXXXXoX ",
+            " XoXXXXoXXXXXoXXoXXXXXoXXXXoX ",
+            " XOooXXoooooooPooooooooXXooOX ",
+            " XXXoXXoXXoXXXXXXXXoXXoXXoXXX ",
+            " XXXoXXoXXoXXXXXXXXoXXoXXoXXX ",
+            " XooooooXXooooXXooooXXooooooX ",
+            " XoXXXXXXXXXXoXXoXXXXXXXXXXoX ",
+            " XoXXXXXXXXXXoXXoXXXXXXXXXXoX ",
+            " XooooooooooooooooooooooooooX ",
+            " XXXXXXXXXXXXXXXXXXXXXXXXXXXX ",
+            "                              ",
+    };
+    for (int i = 0; i < 100; ++i) {
+        map.Mase[i] = tempMase[i];
+    }
+  
 }
 
 int main()
 {
     Pacman Pacman;
     Ghost Blinky, Pinky, Inky, Clyde;
+    Map Map;
     RectangleShape blinky(Vector2f(25, 25));
     blinky.setFillColor(Color::Red); 
-    blinky.setPosition(13 * 25 + 3.0f, 14 * 25 + 3.0f);
+ 
     RectangleShape pinky(Vector2f(25, 25)); 
     pinky.setFillColor(sf::Color(255, 185, 193));
-    pinky.setPosition(14 * 25 + 3.0f, 14 * 25 + 3.0f);
+ 
     RectangleShape inky(Vector2f(25, 25));
     inky.setFillColor(Color::Cyan); 
-    inky.setPosition(15 * 25 + 3.0f, 14 * 25 + 3.0f);
+
     RectangleShape clyde(Vector2f(25, 25)); 
     clyde.setFillColor(sf::Color(255, 165, 0));  
-    clyde.setPosition(15 * 25 + 3.0f, 14 * 25 + 3.0f);
+ 
     sf::Font font;
     if (!font.loadFromFile("Unformital Medium.ttf")) {
         return EXIT_FAILURE;
@@ -414,6 +431,7 @@ int main()
     Loser.setFillColor(sf::Color::White);
     Loser.setPosition(5 * 25, 10 * 25);
 
+    createMap(Map);
     createPacman(Pacman);
     createBlinky(Blinky);
     createPinky(Pinky);
@@ -430,12 +448,12 @@ int main()
                     window.close();
             }
             window.clear(Color::Black);
-            MasePaint();
-            PacmanMove(Pacman);
-            BlinkyMove(Pacman, Blinky);
-            PinkyMove(Pacman,  Pinky);
-            InkyMove(Pacman, Inky, Blinky);
-            ClydeMove(Pacman, Clyde);
+            MasePaint(Map);
+            PacmanMove(Pacman, Map);
+            //BlinkyMove(Pacman, Blinky, Map);
+           // PinkyMove(Pacman,  Pinky, Map);
+            //InkyMove(Pacman, Inky, Blinky, Map);
+          // ClydeMove(Pacman, Clyde, Map);
             pointsText.setString("Points " + std::to_string(Pacman.points));
             livesText.setString("Lifes " + std::to_string(Pacman.lifes));
             window.draw(pointsText);
@@ -454,7 +472,7 @@ int main()
                 createPinky(Pinky);
                 createInky(Inky);
                 createClyde(Clyde);
-                Map.Mase[Pacman.nextY][Pacman.nextX] = ' ';
+                Map.Mase[Pacman.y][Pacman.x] = ' ';
                 Map.Mase[26][14] = 'P';
                 Pacman.nextX = 0;
                 Pacman.nextY = 0;
