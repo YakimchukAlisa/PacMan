@@ -5,391 +5,31 @@
 
 using namespace sf;
 
-struct Food
-{
+class Food {
+private:
     int count, point;
     char type;
+public:
+    Food(int count, int point, char type) {};
+    int getCount() const { return count; }
+    int getPoint() const { return point; }
+    char getType() const { return type; }
+    void decreaseCount() { count--; }
 };
 
-struct Map
-{
-    int H, W, countFood;
-    Food bigFood, smallFood;
+class Map {
+private:
+    int H, W;
     std::string Mase[100];
-};
+public:
+    Map(int H, int W) {};
+    int getH() const { return H; }
+    int getW() const { return W; }
+    char getTile(int y, int x) const { return (y >= 0 && y < H && x >= 0 && x < W) ? Mase[y][x] : 'X'; }
+    void setTile(int y, int x, char tile) { if (y >= 0 && y < H && x >= 0 && x < W) Mase[y][x] = tile; }
 
-struct GameSettings {
-    int screenWidth;
-    int screenHeight;
-    std::string windowTitle;
-    int pacmanSize;
-    int ghostSize;
-    int foodSize;
-    sf::Color pacmanColor;
-    sf::Color squareColor;
-    sf::Color circleColor;
-    sf::Color circle2Color;
-    sf::Color blinkyColor;
-    sf::Color pinkyColor;
-    sf::Color inkyColor;
-    sf::Color clydeColor;
-    int gridSize;
-    int pacmanStartX;
-    int pacmanStartY;
-};
-
-GameSettings* gameSettingsPtr = nullptr;
-
-
-struct Pacman
-{
-    int x, y, nextX, nextY, score, nextDirection, lives, points;
-};
-
-struct Ghost
-{
-    int x, y, nextX, nextY, score, direction, lastDirection;
-};
-
-
-void PacmanMove(Pacman& Pacman, Map& Map)
-{
-    if (Keyboard::isKeyPressed(Keyboard::Up) && Map.Mase[Pacman.nextY - 1][Pacman.nextX] != 'X' && !(Pacman.nextY == 17 && Pacman.nextX == 0 || Pacman.nextY == 17 && Pacman.nextX == Map.W - 1)) {
-        Pacman.nextDirection = 0;
-        Pacman.nextX = Pacman.x;
-        Pacman.nextY = Pacman.y;
-    }
-    if (Keyboard::isKeyPressed(Keyboard::Down) && Map.Mase[Pacman.nextY + 1][Pacman.nextX] != 'X' && !(Pacman.nextY == 17 && Pacman.nextX == 0 || Pacman.nextY == 17 && Pacman.nextX == Map.W - 1)) {
-        Pacman.nextDirection = 1;
-        Pacman.nextX = Pacman.x;
-        Pacman.nextY = Pacman.y;
-    }
-    if (Keyboard::isKeyPressed(Keyboard::Left) && (Map.Mase[Pacman.nextY][Pacman.nextX - 1] != 'X')) {
-        Pacman.nextDirection = 2;
-        Pacman.nextX = Pacman.x;
-        Pacman.nextY = Pacman.y;
-    }
-    if (Keyboard::isKeyPressed(Keyboard::Right) && (Map.Mase[Pacman.nextY][Pacman.nextX + 1] != 'X')) {
-        Pacman.nextDirection = 3;
-        Pacman.nextX = Pacman.x;
-        Pacman.nextY = Pacman.y;
-    }
-
-    Pacman.score++;
-    if (Pacman.score >= 200)
-    {
-        switch (Pacman.nextDirection)
-        {
-        case 0:
-            if (Map.Mase[Pacman.nextY - 1][Pacman.nextX] != 'X' && Pacman.nextY - 1 >= 0)
-                Pacman.nextY--;
-            break;
-        case 1:
-
-            if (Map.Mase[Pacman.nextY + 1][Pacman.nextX] != 'X' && Pacman.nextY + 1 <= 35)
-                Pacman.nextY++;
-            break;
-        case 2:
-            if (Pacman.nextY == 17 && Pacman.nextX == 1)
-                Pacman.nextX = Map.W - 2;
-            else if (Map.Mase[Pacman.nextY][Pacman.nextX - 1] != 'X' && Pacman.nextX - 1 >= 0)
-                Pacman.nextX--;
-            break;
-        case 3:
-            if (Pacman.nextY == 17 && Pacman.nextX == Map.W - 2)
-                Pacman.nextX = 1;
-            else if (Map.Mase[Pacman.nextY][Pacman.nextX + 1] != 'X' && Pacman.nextX + 1 <= 35)
-                Pacman.nextX++;
-            break;
-        }
-        Pacman.score = 0;
-    }
-
-    if ((Map.Mase[Pacman.nextY][Pacman.nextX] == ' ' || Map.Mase[Pacman.nextY][Pacman.nextX] == Map.smallFood.type || Map.Mase[Pacman.nextY][Pacman.nextX] == Map.bigFood.type) && Pacman.nextY != 0 && Pacman.nextX != 0)
-    {
-        if (Map.Mase[Pacman.nextY][Pacman.nextX] == Map.smallFood.type)
-        {
-            Pacman.points += Map.smallFood.point;
-            Map.smallFood.count--;
-        }
-        if (Map.Mase[Pacman.nextY][Pacman.nextX] == Map.bigFood.type)
-        {
-            Pacman.points += Map.bigFood.point;
-            Map.bigFood.count--;
-        }
-        Map.Mase[Pacman.y][Pacman.x] = ' ';
-        Map.Mase[Pacman.nextY][Pacman.nextX] = 'P';
-        Pacman.x = Pacman.nextX;
-        Pacman.y = Pacman.nextY;
-    }
-}
-
-
-void MasePaint(Map Map, RenderWindow& window)
-{
-    RectangleShape square(Vector2f(gameSettingsPtr->gridSize, gameSettingsPtr->gridSize));
-    square.setFillColor(gameSettingsPtr->squareColor);
-    CircleShape circle(3);
-    circle.setFillColor(gameSettingsPtr->circleColor);
-    CircleShape circle2(6);
-    circle2.setFillColor(gameSettingsPtr->circle2Color);
-    RectangleShape pacman(Vector2f(gameSettingsPtr->gridSize, gameSettingsPtr->gridSize));
-    pacman.setFillColor(gameSettingsPtr->pacmanColor);
-    for (int i = 0; i < Map.H; i++)
-        for (int j = 0; j < Map.W; j++)
-        {
-            if (Map.Mase[i][j] == 'X')
-            {
-                square.setPosition(j * gameSettingsPtr->gridSize, i * gameSettingsPtr->gridSize);
-                window.draw(square);
-            }
-            else if (Map.Mase[i][j] == Map.smallFood.type)
-            {
-                circle.setPosition(j * gameSettingsPtr->gridSize + 8.5, i * gameSettingsPtr->gridSize + 8.5f);
-                int pacmanX = static_cast<int>(pacman.getPosition().y / gameSettingsPtr->gridSize);
-                int pacmanCol = static_cast<int>(pacman.getPosition().x / gameSettingsPtr->gridSize);
-                window.draw(circle);
-            }
-            else if (Map.Mase[i][j] == Map.bigFood.type)
-            {
-                circle2.setPosition(j * gameSettingsPtr->gridSize + 5.5f, i * gameSettingsPtr->gridSize + 5.5f);
-                window.draw(circle2);
-            }
-            else if (Map.Mase[i][j] == 'P')
-            {
-                pacman.setPosition(j * gameSettingsPtr->gridSize, i * gameSettingsPtr->gridSize);
-                window.draw(pacman);
-            }
-        }
-}
-
-float distance(int pacmanX, int pacmanY, int ghostX, int ghostY)
-{
-    return (sqrt(pow(pacmanX - ghostX, 2) + pow(pacmanY - ghostY, 2)));
-}
-
-void GhostMove(Ghost& ghost, int x, int y, Map Map)
-{
-
-    float distanceUp;
-    float distanceDown;
-    float distanceLeft;
-    float distanceRight;
-
-    distanceUp = distance(x, y, ghost.x, ghost.y - 1);
-    distanceDown = distance(x, y, ghost.x, ghost.y + 1);
-    if (ghost.y == 17 && ghost.x == 1)
-        distanceLeft = distance(x, y, Map.W - 1, ghost.y);
-    else distanceLeft = distance(x, y, ghost.x - 1, ghost.y);
-    if (ghost.y == 17 && ghost.x == Map.W - 1)
-        distanceRight = distance(x, y, 0, ghost.y);
-    else distanceRight = distance(x, y, ghost.x + 1, ghost.y);
-    double minDistance = INFINITY;
-    int change = 0;
-
-    if (distanceRight <= minDistance && Map.Mase[ghost.y][ghost.x + 1] != 'X' && ghost.lastDirection != 2) {
-        minDistance = distanceRight;
-        ghost.direction = 3;
-    }
-    if (distanceUp <= minDistance && Map.Mase[ghost.y - 1][ghost.x] != 'X' && ghost.lastDirection != 1 && !(ghost.y == 17 && ghost.x == 0 || ghost.y == 17 && ghost.x == Map.W - 1)) {
-        minDistance = distanceUp;
-        ghost.direction = 0;
-    }
-    if (distanceLeft <= minDistance && Map.Mase[ghost.y][ghost.x - 1] != 'X' && ghost.lastDirection != 3) {
-        minDistance = distanceLeft;
-        ghost.direction = 2;
-    }
-    if (distanceDown <= minDistance && Map.Mase[ghost.y + 1][ghost.x] != 'X' && ghost.lastDirection != 0 && !(ghost.y == 17 && ghost.x == 0 || ghost.y == 17 && ghost.x == Map.W - 1)) {
-        minDistance = distanceDown;
-        ghost.direction = 1;
-    }
-
-    ghost.score++;
-    if (ghost.score >= 200)
-    {
-        change = 1;
-        // Двигаемся в выбранном направлении
-        switch (ghost.direction) {
-        case 0: // Движение вверх
-            ghost.y--;
-            break;
-        case 1: // Движение вниз
-            ghost.y++;
-            break;
-        case 2: // Движение влево
-            if (ghost.y == 17 && ghost.x == 1)
-                ghost.x = Map.W - 2;
-            else
-                ghost.x--;
-            break;
-        case 3: // Движение вправо
-            if (ghost.y == 17 && ghost.x == Map.W - 2)
-                ghost.x = 1;
-            else
-                ghost.x++;
-            break;
-        default:
-            break;
-        }
-        ghost.score = 0;
-    }
-
-    if (ghost.lastDirection != ghost.direction && change)
-        ghost.lastDirection = ghost.direction;
-}
-
-void BlinkyMove(Pacman Pacman, Ghost& Blinky, Map Map)
-{
-    GhostMove(Blinky, Pacman.x, Pacman.y, Map);
-}
-
-void PinkyMove(Pacman Pacman, Ghost& Pinky, Map Map)
-{
-    int x = Pacman.x, y = Pacman.y;
-    switch (Pacman.nextDirection)
-    {
-    case 0:
-        y = y - 4;
-        break;
-    case 1:
-        y = y + 4;
-        break;
-    case 2:
-        x = x - 4;
-        break;
-    case 3:
-        x = x + 4;
-        break;
-    }
-    GhostMove(Pinky, x, y, Map);
-}
-
-void InkyMove(Pacman Pacman, Ghost& Inky, Ghost& Blinky, Map Map)
-{
-    int x = Pacman.x, y = Pacman.y;
-    switch (Pacman.nextDirection)
-    {
-    case 0:
-        y = y - 2;
-        break;
-    case 1:
-        y = y + 2;
-        break;
-    case 2:
-        x = x - 2;
-        break;
-    case 3:
-        x = x + 2;
-        break;
-    }
-    x = Blinky.x + 2 * (x - Blinky.x);
-    y = Blinky.y + 2 * (y - Blinky.y);
-    GhostMove(Inky, x, y, Map);
-}
-
-void ClydeMove(Pacman Pacman, Ghost& Clyde, Map Map)
-{
-    int x, y;
-    float mainDistance = distance(Pacman.x, Pacman.y, Clyde.x, Clyde.y);
-    if (mainDistance > 8)
-    {
-        x = Pacman.x;
-        y = Pacman.y;
-    }
-    else
-    {
-        x = 0;
-        y = Map.H;
-    }
-    GhostMove(Clyde, x, y, Map);
-}
-
-int Lose(Pacman& Pacman, Ghost Blinky, Ghost& Pinky, Ghost& Inky, Ghost& Clyde)
-{
-    int f = 1;
-    if (Pacman.x == Blinky.x && Pacman.y == Blinky.y || Pacman.x + 1 == Blinky.x && Pacman.y == Blinky.y || Pacman.x - 1 == Blinky.x && Pacman.y == Blinky.y || Pacman.x == Blinky.x && Pacman.y + 1 == Blinky.y || Pacman.x == Blinky.x && Pacman.y - 1 == Blinky.y)
-        Pacman.lives--;
-    else if (Pacman.x == Pinky.x && Pacman.y == Pinky.y || Pacman.x + 1 == Pinky.x && Pacman.y == Pinky.y || Pacman.x - 1 == Pinky.x && Pacman.y == Pinky.y || Pacman.x == Pinky.x && Pacman.y + 1 == Pinky.y || Pacman.x == Pinky.x && Pacman.y - 1 == Pinky.y)
-        Pacman.lives--;
-    else if (Pacman.x == Inky.x && Pacman.y == Inky.y || Pacman.x + 1 == Inky.x && Pacman.y == Inky.y || Pacman.x - 1 == Inky.x && Pacman.y == Inky.y || Pacman.x == Inky.x && Pacman.y + 1 == Inky.y || Pacman.x == Inky.x && Pacman.y - 1 == Inky.y)
-        Pacman.lives--;
-    else if (Pacman.x == Clyde.x && Pacman.y == Clyde.y || Pacman.x + 1 == Clyde.x && Pacman.y == Clyde.y || Pacman.x - 1 == Clyde.x && Pacman.y == Clyde.y || Pacman.x == Clyde.x && Pacman.y + 1 == Clyde.y || Pacman.x == Clyde.x && Pacman.y - 1 == Clyde.y)
-        Pacman.lives--;
-    else f = 0;
-    return f;
-}
-
-int WonOrLost(Pacman Pacman, Map Map, Text& Result)
-{
-    int f = 1;
-    if (Map.smallFood.count==0 && Map.bigFood.count==0)
-        Result.setString("You won! ");
-    else if ((!Pacman.lives))
-        Result.setString("You lost! ");
-    else f = 0;
-    return f;
-}
-
-void createPacman(Pacman& Pacman) {
-    Pacman.x = 14;
-    Pacman.y = 26;
-    Pacman.nextX = 14;
-    Pacman.nextY = 26;
-    Pacman.nextDirection = 0;
-    Pacman.score = 0;
-    Pacman.lives = 3;
-    Pacman.points = 0;
-}
-
-void createBlinky(Ghost& ghost)
-{
-    ghost.x = 11;
-    ghost.y = 14;
-    ghost.score = 0;
-}
-
-void createPinky(Ghost& ghost)
-{
-    ghost.x = 13;
-    ghost.y = 14;;
-    ghost.score = 0;
-}
-
-void createInky(Ghost& ghost)
-{
-    ghost.x = 15;
-    ghost.y = 14;
-    ghost.score = 0;
-}
-
-void createClyde(Ghost& ghost)
-{
-    ghost.x = 17;
-    ghost.y = 14;
-    ghost.score = 0;
-}
-
-void createsmallFood(Food& smallFood)
-{
-    smallFood.count = 240;
-    smallFood.point = 5;
-    smallFood.type = 'o';
-}
-
-void createbigFood(Food& bigFood)
-{
-    bigFood.count = 4;
-    bigFood.point = 10;
-    bigFood.type = 'O';
-}
-
-void createMap(Map& map, Food smallFood, Food bigFood)
-{
-    map.H = 35;
-    map.W = 30;
-    map.smallFood = smallFood;
-    map.bigFood = bigFood;
-    std::string tempMase[100] = {
+    void createMap() {
+        std::string tempMase[100] = {
         "                              ",
             "                              ",
             "                              ",
@@ -425,141 +65,362 @@ void createMap(Map& map, Food smallFood, Food bigFood)
             " XooooooooooooooooooooooooooX ",
             " XXXXXXXXXXXXXXXXXXXXXXXXXXXX ",
             "                              ",
-    };
-    for (int i = 0; i < 100; ++i) {
-        map.Mase[i] = tempMase[i];
+        };
+        for (int i = 0; i < 100; ++i) {
+            Mase[i] = tempMase[i];
+        }
+    }
+    void MasePaint(GameSettings settings, RenderWindow& window, Food smallFood, Food bigFood) {
+        RectangleShape square(Vector2f(settings.getGridSize(), settings.getGridSize()));
+        square.setFillColor(settings.getSquareColor());
+        CircleShape circle(3);
+        circle.setFillColor(settings.getCircleColor());
+        CircleShape circle2(6);
+        circle2.setFillColor(settings.getCircle2Color());
+        RectangleShape pacman(Vector2f(settings.getGridSize(), settings.getGridSize()));
+        pacman.setFillColor(settings.getPacmanColor());
+        for (int i = 0; i < H; i++)
+            for (int j = 0; j < W; j++)
+            {
+                if (Mase[i][j] == 'X')
+                {
+                    square.setPosition(j * settings.getGridSize(), i * settings.getGridSize());
+                    window.draw(square);
+                }
+                else if (Mase[i][j] == smallFood.getType())
+                {
+                    circle.setPosition(j * settings.getGridSize() + 8.5, i * settings.getGridSize() + 8.5f);
+                    int pacmanX = static_cast<int>(pacman.getPosition().y / settings.getGridSize());
+                    int pacmanCol = static_cast<int>(pacman.getPosition().x / settings.getGridSize());
+                    window.draw(circle);
+                }
+                else if (Mase[i][j] == bigFood.getType())
+                {
+                    circle2.setPosition(j * settings.getGridSize() + 5.5f, i * settings.getGridSize() + 5.5f);
+                    window.draw(circle2);
+                }
+                else if (Mase[i][j] == 'P')
+                {
+                    pacman.setPosition(j * settings.getGridSize(), i * settings.getGridSize());
+                    window.draw(pacman);
+                }
+            }
+    }
+};
+
+class GameSettings {
+private:
+    int screenWidth;
+    int screenHeight;
+    std::string windowTitle;
+    int pacmanSize;
+    int ghostSize;
+    int foodSize;
+    sf::Color pacmanColor;
+    sf::Color squareColor;
+    sf::Color circleColor;
+    sf::Color circle2Color;
+    sf::Color blinkyColor;
+    sf::Color pinkyColor;
+    sf::Color inkyColor;
+    sf::Color clydeColor;
+    int gridSize;
+    int pacmanStartX;
+    int pacmanStartY;
+
+public:
+    GameSettings(int screenWidth, int screenHeight, std::string windowTitle,
+        int pacmanSize, int ghostSize, int foodSize, int gridSize,
+        int pacmanStartX, int pacmanStartY,
+        sf::Color pacmanColor, sf::Color squareColor, sf::Color circleColor,
+        sf::Color circle2Color, sf::Color blinkyColor, sf::Color pinkyColor,
+        sf::Color inkyColor, sf::Color clydeColor) {}
+
+    int getScreenWidth() const { return screenWidth; }
+    int getScreenHeight() const { return screenHeight; }
+    std::string getWindowTitle() const { return windowTitle; }
+    int getPacmanSize() const { return pacmanSize; }
+    int getGhostSize() const { return ghostSize; }
+    int getFoodSize() const { return foodSize; }
+    int getGridSize() const { return gridSize; }
+    int getPacmanStartX() const { return pacmanStartX; }
+    int getPacmanStartY() const { return pacmanStartY; }
+    sf::Color getPacmanColor() const { return pacmanColor; }
+    sf::Color getSquareColor() const { return squareColor; }
+    sf::Color getCircleColor() const { return circleColor; }
+    sf::Color getCircle2Color() const { return circle2Color; }
+    sf::Color getBlinkyColor() const { return blinkyColor; }
+    sf::Color getPinkyColor() const { return pinkyColor; }
+    sf::Color getInkyColor() const { return inkyColor; }
+    sf::Color getClydeColor() const { return clydeColor; }
+};
+
+class Pacman {
+private:
+    int x, y, nextX, nextY, score, nextDirection, lives, points;
+public:
+    Pacman(int x, int y, int NextX, int nextY, int score, int nextDirection, int lives, int points) {};
+    int getX() const { return x; }
+    int getY() const { return y; }
+    int getPoints() const { return points; }
+    int getLives() const { return lives; }
+    int getNextDirection() const { return nextDirection; }
+    void loseLife() { lives--; }
+    void move(Map map, Food smallFood, Food bigFood) {
+        if (Keyboard::isKeyPressed(Keyboard::Up) && map.getTile(nextY - 1, nextX) != 'X' && !(nextY == 17 && nextX == 0 || nextY == 17 && nextX == map.getW() - 1)) {
+        nextDirection = 0;
+        nextX = x;
+        nextY = y;
+    }
+    if (Keyboard::isKeyPressed(Keyboard::Down) && map.getTile(nextY + 1, nextX) != 'X' && !(nextY == 17 && nextX == 0 || nextY == 17 && nextX == map.getW() - 1)) {
+        nextDirection = 1;
+        nextX = x;
+        nextY = y;
+    }
+    if (Keyboard::isKeyPressed(Keyboard::Left) && (map.getTile(nextY,nextX - 1) != 'X')) {
+        nextDirection = 2;
+        nextX = x;
+        nextY =y;
+    }
+    if (Keyboard::isKeyPressed(Keyboard::Right) && (map.getTile(nextY,nextX + 1) != 'X')) {
+        nextDirection = 3;
+        nextX = x;
+        nextY = y;
+    }
+
+    score++;
+    if (score >= 200)
+    {
+        switch (nextDirection)
+        {
+        case 0:
+            if (map.getTile(nextY - 1,nextX) != 'X' && nextY - 1 >= 0)
+                nextY--;
+            break;
+        case 1:
+
+            if (map.getTile(nextY + 1,nextX) != 'X' && nextY + 1 <= 35)
+                nextY++;
+            break;
+        case 2:
+            if (nextY == 17 && nextX == 1)
+                nextX = map.getW() - 2;
+            else if (map.getTile(nextY,nextX - 1) != 'X' && nextX - 1 >= 0)
+                nextX--;
+            break;
+        case 3:
+            if (nextY == 17 && nextX == map.getW() - 2)
+                nextX = 1;
+            else if (map.getTile(nextY,nextX + 1) != 'X' && nextX + 1 <= 35)
+                nextX++;
+            break;
+        }
+        score = 0;
+    }
+
+    if ((map.getTile(nextY, nextX) == ' ' || map.getTile(nextY, nextX) == smallFood.getType() || map.getTile(nextY, nextX) == bigFood.getType()) && nextY != 0 && nextX != 0)
+    {
+        if (map.getTile(nextY,nextX) == smallFood.getType())
+        {
+            points += smallFood.getPoint();
+            smallFood.decreaseCount();
+        }
+        if (map.getTile(nextY,nextX) == bigFood.getType())
+        {
+            points += bigFood.getType();
+            bigFood.decreaseCount();
+        }
+        map.setTile(y, x, ' ');
+        map.setTile(nextY, nextX,'P');
+        x = nextX;
+        y = nextY;
     }
 }
 
-void createGameSettings()
-{
-    gameSettingsPtr = new GameSettings;
-    gameSettingsPtr->screenWidth = 800;
-    gameSettingsPtr->screenHeight = 600;
-    gameSettingsPtr->windowTitle = "Pac-Man";
-    gameSettingsPtr->pacmanSize = 20;
-    gameSettingsPtr->ghostSize = 18;
-    gameSettingsPtr->foodSize = 10;
-    gameSettingsPtr->pacmanColor = sf::Color::Yellow;
-    gameSettingsPtr->squareColor = sf::Color::Blue;
-    gameSettingsPtr->circleColor = sf::Color::White;
-    gameSettingsPtr->circle2Color = sf::Color::White;
-    gameSettingsPtr->blinkyColor = sf::Color::Red;
-    gameSettingsPtr->pinkyColor = sf::Color(255, 185, 193);
-    gameSettingsPtr->inkyColor = sf::Color::Cyan;
-    gameSettingsPtr->clydeColor = sf::Color(255, 165, 0);
-    gameSettingsPtr->gridSize = 25;
-    gameSettingsPtr->pacmanStartX = 14;
-    gameSettingsPtr->pacmanStartY = 26;
-}
+    int Lose(Ghost blinky, Ghost pinky, Ghost inky, Ghost clyde)
+    {
+        int f = 1;
+        if (x == blinky.getX() && y == blinky.getY() || x + 1 == blinky.getX() && y== blinky.getY() || x - 1 == blinky.getX() && y == blinky.getY() || x == blinky.getX() && y + 1 == blinky.getY() || x == blinky.getX() && y - 1 == blinky.getX())
+            loseLife();
+        else if (x == pinky.getX() && y == pinky.getY() || x + 1 == pinky.getX() && y == pinky.getY() || x - 1 == pinky.getX() && y == pinky.getY() || x == pinky.getX() && y + 1 == pinky.getY() || x == pinky.getX() && y - 1 == pinky.getY())
+            loseLife();
+        else if (x == inky.getX() && y == inky.getY() || x + 1 == inky.getX() && y == inky.getY() || x - 1 == inky.getX() && y == inky.getY() || x == inky.getX() && y + 1 == inky.getY() || x == inky.getX() && y - 1 == inky.getY())
+            loseLife();
+        else if (x == clyde.getX() && y == clyde.getY() || x + 1 == clyde.getX() && y == clyde.getY() || x - 1 == clyde.getX() && y == clyde.getY() || x == clyde.getX() && y + 1 == clyde.getY() || x == clyde.getX() && y - 1 == clyde.getY())
+            loseLife();
+        else f = 0;
+        return f;
+    }
+
+    int WonOrLost(Food smallFood, Food bigFood, Text& Result)
+    {
+        int f = 1;
+        if (smallFood.getCount() == 0 && bigFood.getCount() == 0)
+            Result.setString("You won! ");
+        else if (!lives)
+            Result.setString("You lost! ");
+        else f = 0;
+        return f;
+    }
+};
+
+class Ghost: public Pacman {
+private:
+    int x, y, score, direction, lastDirection;
+public:
+    Ghost(int x, int y, int score, int direction, int lastDirection) {};
+    int getX() const { return x; }
+    int getY() const { return y; }
+    int getScore() const { return score; }
+    int getDirection() const { return direction; }
+    int getLAstDirection() const { return lastDirection; }
+
+    float distance(int x1, int y1, int x2, int y2) {
+        return (sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2)));
+    }
+
+    void move(Map map, int goalX, int goalY) {
+        float distanceUp, distanceDown, distanceLeft, distanceRight;
+        double minDistance = INFINITY;
+        int change = 0;
+
+        distanceUp = distance(goalX, goalY, x, y - 1);
+        distanceDown = distance(goalX, goalY, x, y + 1);
+        if (y == 17 && x == 1)
+            distanceLeft = distance(goalX, goalY, map.getW() - 1, y);
+        else distanceLeft = distance(goalX, goalY, x - 1, y);
+        if (y == 17 && x == map.getW() - 1)
+            distanceRight = distance(goalX, goalY, 0, y);
+        else distanceRight = distance(goalX, goalY, x + 1, y);
+
+        if (distanceRight <= minDistance && map.getTile(y, x + 1) != 'X' && lastDirection != 2) {
+            minDistance = distanceRight;
+            direction = 3;
+        }
+        if (distanceUp <= minDistance && map.getTile(y - 1, x) != 'X' && lastDirection != 1 && !(y == 17 && x == 0 || y == 17 && x == map.getW() - 1)) {
+            minDistance = distanceUp;
+            direction = 0;
+        }
+        if (distanceLeft <= minDistance && map.getTile(y, x - 1) != 'X' && lastDirection != 3) {
+            minDistance = distanceLeft;
+            direction = 2;
+        }
+        if (distanceDown <= minDistance && map.getTile(y + 1, x) != 'X' && lastDirection != 0 && !(y == 17 && x == 0 || y == 17 && x == map.getW() - 1)) {
+            minDistance = distanceDown;
+            direction = 1;
+        }
+
+        score++;
+        if (score >= 200)
+        {
+            change = 1;
+            // Двигаемся в выбранном направлении
+            switch (direction) {
+            case 0: // Движение вверх
+                y--;
+                break;
+            case 1: // Движение вниз
+                y++;
+                break;
+            case 2: // Движение влево
+                if (y == 17 && x == 1)
+                    x = map.getW() - 2;
+                else
+                    x--;
+                break;
+            case 3: // Движение вправо
+                if (y == 17 && x == map.getW() - 2)
+                    x = 1;
+                else
+                    x++;
+                break;
+            default:
+                break;
+            }
+            score = 0;
+        }
+
+        if (lastDirection != direction && change)
+            lastDirection = direction;
+    }
+
+    void BlinkyMove(Pacman pacman, Map map) {
+        move(map, pacman.getX(), pacman.getY());
+    }
+
+    void PinkyMove(Pacman pacman, Map map) {
+        int a = pacman.getX(), b = pacman.getY();
+        switch (pacman.getNextDirection())
+        {
+        case 0:
+            b = b - 4;
+            break;
+        case 1:
+            b = b + 4;
+            break;
+        case 2:
+            a = a - 4;
+            break;
+        case 3:
+            a = a + 4;
+            break;
+        }
+        move(map, a, b);
+    }
+
+    void InkyMove(Pacman pacman, Map map, Ghost blinky) {
+        int a = pacman.getX(), b = pacman.getY();
+        switch (pacman.getNextDirection())
+        {
+        case 0:
+            y = y - 2;
+            break;
+        case 1:
+            y = y + 2;
+            break;
+        case 2:
+            x = x - 2;
+            break;
+        case 3:
+            x = x + 2;
+            break;
+        }
+        a = blinky.getX() + 2 * (a - blinky.getX());
+        b = blinky.getY() + 2 * (b - blinky.getY());
+        move(map, a, b);
+    }
+
+    void ClydeMove(Pacman pacman, Map map) {
+        int a, b;
+        float mainDistance = distance(pacman.getX(), pacman.getY(), x, y);
+        if (mainDistance > 8)
+        {
+            a = pacman.getX();
+            b = pacman.getY();
+        }
+        else
+        {
+            a = 0;
+            b = map.getH();
+        }
+        move(map, a, b);
+    }
+};
+
+  
+ 
+
+
+
+
 
 int main()
 {
-    createGameSettings();
-    RenderWindow window(VideoMode(30 * gameSettingsPtr->gridSize, 35 * gameSettingsPtr->gridSize), "Pac-Man");
-    Pacman Pacman;
-    Ghost Blinky, Pinky, Inky, Clyde;
-    Map Map;
-    Food bigFood, smallFood;
-
-    RectangleShape blinky(Vector2f(gameSettingsPtr->gridSize, gameSettingsPtr->gridSize));
-    blinky.setFillColor(gameSettingsPtr->blinkyColor);
-
-    RectangleShape pinky(Vector2f(gameSettingsPtr->gridSize, gameSettingsPtr->gridSize));
-    pinky.setFillColor(gameSettingsPtr->pinkyColor);
-
-    RectangleShape inky(Vector2f(gameSettingsPtr->gridSize, gameSettingsPtr->gridSize));
-    inky.setFillColor(gameSettingsPtr->inkyColor);
-
-    RectangleShape clyde(Vector2f(gameSettingsPtr->gridSize, gameSettingsPtr->gridSize));
-    clyde.setFillColor(gameSettingsPtr->clydeColor);
-
-    sf::Font font;
-    if (!font.loadFromFile("Unformital Medium.ttf")) {
-        return EXIT_FAILURE;
-    }
-    sf::Text pointsText;
-    pointsText.setFont(font);
-    pointsText.setCharacterSize(40);
-    pointsText.setFillColor(sf::Color::White);
-    pointsText.setPosition(2 * gameSettingsPtr->gridSize, 1 * gameSettingsPtr->gridSize);
-
-    sf::Text livesText;
-    livesText.setFont(font);
-    livesText.setCharacterSize(40);
-    livesText.setFillColor(sf::Color::White);
-    livesText.setPosition(22 * gameSettingsPtr->gridSize, 1 * gameSettingsPtr->gridSize);
-
-    sf::Text Result;
-    Result.setFont(font);
-    Result.setCharacterSize(80);
-    Result.setFillColor(sf::Color::White);
-    Result.setPosition(5 * gameSettingsPtr->gridSize, 10 * gameSettingsPtr->gridSize);
-
-    createbigFood(bigFood);
-    createsmallFood(smallFood);
-    createMap(Map, smallFood, bigFood);
-    createPacman(Pacman);
-    createBlinky(Blinky);
-    createPinky(Pinky);
-    createInky(Inky);
-    createClyde(Clyde);
-
-    while (window.isOpen())
-    {
-        Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == Event::Closed)
-                window.close();
-        }
-        window.clear(Color::Black);
-        MasePaint(Map, window);
-        if (!(WonOrLost(Pacman, Map, Result)))
-        {
-            BlinkyMove(Pacman, Blinky, Map);
-            PinkyMove(Pacman, Pinky, Map);
-            InkyMove(Pacman, Inky, Blinky, Map);
-            ClydeMove(Pacman, Clyde, Map);
-            pointsText.setString("Points " + std::to_string(Pacman.points));
-            livesText.setString("Lives " + std::to_string(Pacman.lives));
-            window.draw(pointsText);
-            window.draw(livesText);
-            pinky.setPosition(Pinky.x * gameSettingsPtr->gridSize, Pinky.y * gameSettingsPtr->gridSize);
-            blinky.setPosition(Blinky.x * gameSettingsPtr->gridSize, Blinky.y * gameSettingsPtr->gridSize);
-            inky.setPosition(Inky.x * gameSettingsPtr->gridSize, Inky.y * gameSettingsPtr->gridSize);
-            clyde.setPosition(Clyde.x * gameSettingsPtr->gridSize, Clyde.y * gameSettingsPtr->gridSize);
-            window.draw(blinky);
-            window.draw(pinky);
-            window.draw(inky);
-            window.draw(clyde);
-            if (Lose(Pacman, Blinky, Pinky, Inky, Clyde))
-            {
-                createBlinky(Blinky);
-                createPinky(Pinky);
-                createInky(Inky);
-                createClyde(Clyde);
-                Map.Mase[Pacman.y][Pacman.x] = ' ';
-                Map.Mase[26][14] = 'P';
-                Pacman.nextX = gameSettingsPtr->pacmanStartX;
-                Pacman.nextY = gameSettingsPtr->pacmanStartY;
-                Pacman.x = gameSettingsPtr->pacmanStartX;
-                Pacman.y = gameSettingsPtr->pacmanStartY;
-                Pacman.score = 0;
-                Pacman.nextDirection = 3;
-            }
-            PacmanMove(Pacman, Map);
-            if (WonOrLost(Pacman, Map, Result))
-            {
-                sf::FloatRect textBounds = Result.getLocalBounds();
-                sf::Vector2u windowSize = window.getSize();
-                Result.setPosition((windowSize.x - textBounds.width) / 2, (windowSize.y - textBounds.height) / 2 - 50);
-                window.draw(Result);
-            }
-            window.display();
-        }
-    }
-    delete gameSettingsPtr;
-    gameSettingsPtr = nullptr;
+    GameSettings settings(800, 600, "Pac-Man", 20, 20, 10, 25, 14, 26,sf::Color::Yellow, sf::Color::Blue, sf::Color::White, sf::Color::White, sf::Color::Red, sf::Color(255, 185, 193), sf::Color::Cyan, sf::Color(255, 165, 0));
+    Map map(35, 30);
+    Pacman pacman(14, 26, 14, 26, 0, 3, 3, 0);
+    Ghost Blinky(11, 14, 0, 3, 3), Pinky(13, 14, 0, 3, 3), Inky(15, 14, 0, 3, 3), Clyde(17, 14, 0, 3, 3);
+    Food smallFood(240, 5, 'o'), bigFood(4, 10, 'O');
+    RenderWindow window(VideoMode(settings.getScreenWidth(), settings.getScreenHeight()), settings.getWindowTitle());
     return 0;
 }
