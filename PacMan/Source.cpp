@@ -45,7 +45,7 @@ GameSettings* gameSettingsPtr = nullptr;
 
 struct Pacman
 {
-    int x, y, nextX, nextY,score, direction, nextDirection, lives, points;
+    int x, y, nextX, nextY,score, nextDirection, lives, points;
 };
 
 struct Ghost
@@ -309,13 +309,13 @@ void ClydeMove(Pacman Pacman, Ghost& Clyde, Map Map)
 int Lose(Pacman& Pacman, Ghost Blinky, Ghost& Pinky, Ghost& Inky, Ghost& Clyde)
 {
     int f = 1;
-    if ((Pacman.nextX == Blinky.x && Pacman.nextY == Blinky.y) || (Pacman.x == Blinky.x && Pacman.y == Blinky.y))
+    if (Pacman.x == Blinky.x && Pacman.y == Blinky.y)
         Pacman.lives--;
-    else if ((Pacman.nextX == Pinky.x && Pacman.nextY == Pinky.y) || (Pacman.x == Pinky.x && Pacman.y == Pinky.y))
+    else if (Pacman.x == Pinky.x && Pacman.y == Pinky.y)
         Pacman.lives--;
-    else if ((Pacman.nextX == Inky.x && Pacman.nextY == Inky.y) || (Pacman.x == Inky.x && Pacman.y == Inky.y))
+    else if (Pacman.x == Inky.x && Pacman.y == Inky.y)
         Pacman.lives--;
-    else if ((Pacman.nextX == Clyde.x && Pacman.nextY == Clyde.y) || (Pacman.x == Clyde.x && Pacman.y == Clyde.y))
+    else if (Pacman.x == Clyde.x && Pacman.y == Clyde.y)
         Pacman.lives--;
     else f = 0;
     return f;
@@ -324,10 +324,9 @@ int Lose(Pacman& Pacman, Ghost Blinky, Ghost& Pinky, Ghost& Inky, Ghost& Clyde)
 void createPacman(Pacman& Pacman) {
     Pacman.x = 14;
     Pacman.y = 26;
-    Pacman.nextX = 0;
-    Pacman.nextY = 0;
-    Pacman.direction = 3;
-    Pacman.nextDirection = 3;
+    Pacman.nextX = 14;
+    Pacman.nextY = 26;
+    Pacman.nextDirection = 0;
     Pacman.score = 0;
     Pacman.lives = 3;
     Pacman.points = 0;
@@ -335,14 +334,14 @@ void createPacman(Pacman& Pacman) {
 
 void createBlinky(Ghost& ghost)
 {
-    ghost.x = 13;
+    ghost.x = 11;
     ghost.y = 14;
     ghost.score = 0;
 }
 
 void createPinky(Ghost& ghost)
 {
-    ghost.x = 14;
+    ghost.x = 13;
     ghost.y = 14;;
     ghost.score = 0;
 }
@@ -356,7 +355,7 @@ void createInky(Ghost& ghost)
 
 void createClyde(Ghost& ghost)
 {
-    ghost.x = 16;
+    ghost.x = 17;
     ghost.y = 14;
     ghost.score = 0;
 }
@@ -520,7 +519,6 @@ int main()
             MasePaint(Map, window);
             if (!(WonOrLost(Pacman, Map, Result)))
             {
-                PacmanMove(Pacman, Map);
                 BlinkyMove(Pacman, Blinky, Map);
                 PinkyMove(Pacman, Pinky, Map);
                 InkyMove(Pacman, Inky, Blinky, Map);
@@ -559,8 +557,11 @@ int main()
                     Result.setPosition((windowSize.x - textBounds.width) / 2, (windowSize.y - textBounds.height) / 2 -50);
                     window.draw(Result);
                 }
+                PacmanMove(Pacman, Map);
                 window.display();
             }
         }
+        delete gameSettingsPtr;
+        gameSettingsPtr = nullptr;
     return 0;
 }
