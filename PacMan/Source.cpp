@@ -7,12 +7,7 @@ using namespace sf;
 
 class GameSettings {
 private:
-    int screenWidth;
-    int screenHeight;
     std::string windowTitle;
-    int pacmanSize;
-    int ghostSize;
-    int foodSize;
     sf::Color pacmanColor;
     sf::Color squareColor;
     sf::Color circleColor;
@@ -27,21 +22,15 @@ private:
 
 public:
     GameSettings() {};
-    GameSettings(int screenWidth, int screenHeight, std::string windowTitle,
-        int pacmanSize, int ghostSize, int foodSize, int gridSize,
+    GameSettings(std::string windowTitle,int gridSize,
         int pacmanStartX, int pacmanStartY,
         sf::Color pacmanColor, sf::Color squareColor, sf::Color circleColor,
         sf::Color circle2Color, sf::Color blinkyColor, sf::Color pinkyColor,
-        sf::Color inkyColor, sf::Color clydeColor) :screenWidth(screenWidth), screenHeight(screenHeight), windowTitle(windowTitle), pacmanSize(pacmanSize), ghostSize(ghostSize), foodSize(foodSize), gridSize(gridSize),
+        sf::Color inkyColor, sf::Color clydeColor) : windowTitle(windowTitle), gridSize(gridSize),
         pacmanStartX(pacmanStartX), pacmanStartY(pacmanStartY), pacmanColor(pacmanColor), squareColor(squareColor), circleColor(circleColor), circle2Color(circle2Color), blinkyColor(blinkyColor), pinkyColor(pinkyColor), 
         inkyColor(inkyColor), clydeColor(clydeColor) {};
 
-    int getScreenWidth() const { return screenWidth; }
-    int getScreenHeight() const { return screenHeight; }
     std::string getWindowTitle() const { return windowTitle; }
-    int getPacmanSize() const { return pacmanSize; }
-    int getGhostSize() const { return ghostSize; }
-    int getFoodSize() const { return foodSize; }
     int getGridSize() const { return gridSize; }
     int getPacmanStartX() const { return pacmanStartX; }
     int getPacmanStartY() const { return pacmanStartY; }
@@ -109,7 +98,7 @@ public:
             " XooooooooooooXXooooooooooooX ",
             " XoXXXXoXXXXXoXXoXXXXXoXXXXoX ",
             " XoXXXXoXXXXXoXXoXXXXXoXXXXoX ",
-            " XOooXXoooooooPooooooooXXooOX ",
+            " XOooXXooooooooooooooooXXooOX ",
             " XXXoXXoXXoXXXXXXXXoXXoXXoXXX ",
             " XXXoXXoXXoXXXXXXXXoXXoXXoXXX ",
             " XooooooXXooooXXooooXXooooooX ",
@@ -170,8 +159,6 @@ public:
     Pacman(int x, int y, int nextX, int nextY, int score, int nextDirection, int lives, int points) : x(x), y(y), nextX(nextX), nextY(nextY), score(score), nextDirection(nextDirection), lives(lives), points(points) {};
     int getX() const { return x; }
     int getY() const { return y; }
-    int getStartX() const { return 14; }
-    int getStartY() const { return 26; }
     int getPoints() const { return points; }
     int getLives() const { return lives; }
     int getNextDirection() const { return nextDirection; }
@@ -276,7 +263,7 @@ public:
     int getY() const { return y; }
     int getScore() const { return score; }
     int getDirection() const { return direction; }
-    int getLAstDirection() const { return lastDirection; }
+    int getLastDirection() const { return lastDirection; }
     void setAll(int a, int b, int c, int d, int e) { x = a, y = b, score = c, d = direction, e = lastDirection; }
 
     float distance(int x1, int y1, int x2, int y2) {
@@ -559,14 +546,29 @@ int main()
 {
     Food smallFood(240, 5, 'o');
     Food bigFood(4, 10, 'O');
-    GameSettings settings(750, 875, "Pac-Man", 20, 20, 10, 25, 14, 26,sf::Color::Yellow, sf::Color::Blue, sf::Color::White, sf::Color::White, sf::Color::Red, sf::Color(255, 185, 193), sf::Color::Cyan, sf::Color(255, 165, 0));
     Map map(35, 30);
+    //динамический массив объектов класса GameSettings 
+    GameSettings* settingsArray;
+    settingsArray = new GameSettings[2];
+    settingsArray[0] = GameSettings("Pac-Man 1", 25, 14, 26, sf::Color::Yellow, sf::Color::Blue, sf::Color::White, sf::Color::White, sf::Color::Red, sf::Color(255, 185, 193), sf::Color::Cyan, sf::Color(255, 165, 0));
+    settingsArray[1] = GameSettings("Pac-Man 1", 25, 14, 26,
+        sf::Color(255, 255, 153),  // pacman - Мягкий желтый (чуть насыщеннее)
+        sf::Color(100, 149, 247),  // wall -  Средний голубой (не совсем блеклый)
+        sf::Color(255, 245, 238),  // pellet - Светло-желтый (мягче, но не бледный)
+        sf::Color(255, 228, 225), // power pellet - Светло-персиковый (мягче белого)
+        sf::Color(220, 20, 60),  // ghost1 - Розовый (мягче красного, но не блеклый)
+        sf::Color(255, 105, 180), // ghost2 - Темно-розовый (не совсем блеклый)
+        sf::Color(176, 234, 240), // ghost3 -  Сине-серый (не блеклый)
+        sf::Color(255, 140, 0)  // ghost4 - Насыщенный оранжевый (не бледный)
+    );
+    srand(time(NULL));
+    GameSettings settings = settingsArray[rand()%2];
     map.createMap();
-    Pacman pacman(14, 26, 14, 26, 0, 3, 3, 0);
-    Blinky blinky(11, 14, 0, 3, 3);
+    Pacman pacman(settings.getPacmanStartX(), settings.getPacmanStartY(), settings.getPacmanStartX(), settings.getPacmanStartY(), 0, 3, 3, 0);
+    Blinky blinky(10, 14, 0, 3, 3);
     Pinky pinky(13, 14, 0, 3, 3);
-    Inky inky(15, 14, 0, 3, 3);
-    Clyde clyde(17, 14, 0, 3, 3);
+    Inky inky(16, 14, 0, 3, 3);
+    Clyde clyde(19, 14, 0, 3, 3);
     sf::Font font;
     if (!font.loadFromFile("Unformital Medium.ttf")) {
         return EXIT_FAILURE;
@@ -589,7 +591,7 @@ int main()
     Result.setFillColor(sf::Color::White);
     Result.setPosition(5 * settings.getGridSize(), 10 * settings.getGridSize());
 
-    RenderWindow window(VideoMode(settings.getScreenWidth(), settings.getScreenHeight()), settings.getWindowTitle());
+    RenderWindow window(VideoMode(settings.getGridSize() * map.getW(), settings.getGridSize() * map.getH()), settings.getWindowTitle());
     while (window.isOpen())
     {
         Event event;
@@ -613,11 +615,11 @@ int main()
                 inky.setAll(15, 14, 0, 3, 3);
                 clyde.setAll(17, 14, 0, 3, 3);
                 map.setTile(pacman.getY(), pacman.getX(), ' ');
-                map.setTile(26, 14, 'P');
-                pacman.setX(pacman.getStartX());
-                pacman.setY(pacman.getStartY());
-                pacman.setNextX(pacman.getStartX());
-                pacman.setNextY(pacman.getStartY());
+                map.setTile(settings.getPacmanStartY(), settings.getPacmanStartX(), 'P');
+                pacman.setX(settings.getPacmanStartX());
+                pacman.setY(settings.getPacmanStartY());
+                pacman.setNextX(settings.getPacmanStartX());
+                pacman.setNextY(settings.getPacmanStartY());
                 pacman.setScore(0);
                 pacman.setNextDirection(3);
             }
