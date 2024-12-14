@@ -72,7 +72,7 @@ public:
 
     void createMap() {
         std::string tempMase[100] = {
-        "                              ",
+            "                              ",
             "                              ",
             "                              ",
             " XXXXXXXXXXXXXXXXXXXXXXXXXXXX ",
@@ -544,14 +544,14 @@ public:
 
 int main()
 {
-    Food smallFood(240, 5, 'o');
+    Food smallFood(242, 5, 'o');
     Food bigFood(4, 10, 'O');
     Map map(35, 30);
     //динамический массив объектов класса GameSettings 
     GameSettings* settingsArray;
     settingsArray = new GameSettings[2];
     settingsArray[0] = GameSettings("Pac-Man 1", 25, 14, 26, sf::Color::Yellow, sf::Color::Blue, sf::Color::White, sf::Color::White, sf::Color::Red, sf::Color(255, 185, 193), sf::Color::Cyan, sf::Color(255, 165, 0));
-    settingsArray[1] = GameSettings("Pac-Man 1", 25, 14, 26,
+    settingsArray[1] = GameSettings("Pac-Man 1", 25, 14, 8,
         sf::Color(255, 255, 153),  // pacman - Мягкий желтый (чуть насыщеннее)
         sf::Color(100, 149, 247),  // wall -  Средний голубой (не совсем блеклый)
         sf::Color(255, 245, 238),  // pellet - Светло-желтый (мягче, но не бледный)
@@ -564,11 +564,17 @@ int main()
     srand(time(NULL));
     GameSettings settings = settingsArray[rand()%2];
     map.createMap();
-    Pacman pacman(settings.getPacmanStartX(), settings.getPacmanStartY(), settings.getPacmanStartX(), settings.getPacmanStartY(), 0, 3, 3, 0);
-    Blinky blinky(10, 14, 0, 3, 3);
-    Pinky pinky(13, 14, 0, 3, 3);
-    Inky inky(16, 14, 0, 3, 3);
-    Clyde clyde(19, 14, 0, 3, 3);
+    //Mассив динамических объектов класса Ghost
+    Pacman pacman(settings.getPacmanStartX(), settings.getPacmanStartY(), settings.getPacmanStartX(), settings.getPacmanStartY(), 0, 3, 5, 0);
+    Ghost** ghostArray = new Ghost * [4];
+    ghostArray[0] = new Blinky(11, 14, 0, 3, 3);
+    ghostArray[1] = new Pinky(13, 14, 0, 3, 3);
+    ghostArray[2] = new Inky(15, 14, 0, 3, 3);
+    ghostArray[3] = new Clyde(17, 14, 0, 3, 3);
+    Blinky& blinky = *static_cast<Blinky*>(ghostArray[0]);
+    Pinky& pinky = *static_cast<Pinky*>(ghostArray[1]);
+    Inky& inky = *static_cast<Inky*>(ghostArray[2]);
+    Clyde& clyde = *static_cast<Clyde*>(ghostArray[3]);
     sf::Font font;
     if (!font.loadFromFile("Unformital Medium.ttf")) {
         return EXIT_FAILURE;
@@ -638,5 +644,6 @@ int main()
             window.display();
         }
     }
+    delete[] settingsArray;
     return 0;
 }
