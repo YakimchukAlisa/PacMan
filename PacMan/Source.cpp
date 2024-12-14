@@ -244,7 +244,7 @@ public:
         }
         if (map.getTile(nextY,nextX) == bigFood.getType())
         {
-            addPoints(bigFood.getType());
+            addPoints(bigFood.getPoint());
             bigFood.decreaseCount();
         }
         map.setTile(y, x, ' ');
@@ -259,7 +259,7 @@ public:
         int f = 1;
         if (smallFood.getCount() == 0 && bigFood.getCount() == 0)
             Result.setString("You won! ");
-        else if (!lives)
+        else if (!getLives())
             Result.setString("You lost! ");
         else f = 0;
         return f;
@@ -356,8 +356,12 @@ public:
     Blinky() {};
     ~Blinky() {};
     Blinky(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
-    void BlinkyMove(Pacman pacman, Map map) {
+    void BlinkyMove(Pacman pacman, Map map, GameSettings settings, RenderWindow &window) {
         move(map, pacman.getX(), pacman.getY());
+        RectangleShape blinkyShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
+        blinkyShape.setFillColor(settings.getBlinkyColor());
+        blinkyShape.setPosition(getX() * settings.getGridSize(), getY() * settings.getGridSize());
+        window.draw(blinkyShape);
     }
 };
 
@@ -368,7 +372,7 @@ public:
     Pinky() {};
     ~Pinky() {};
     Pinky(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
-    void PinkyMove(Pacman pacman, Map map) {
+    void PinkyMove(Pacman pacman, Map map, GameSettings settings, RenderWindow& window) {
         int a = pacman.getX(), b = pacman.getY();
         switch (pacman.getNextDirection())
         {
@@ -386,6 +390,10 @@ public:
             break;
         }
         move(map, a, b);
+        RectangleShape pinkyShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
+        pinkyShape.setFillColor(settings.getPinkyColor());
+        pinkyShape.setPosition(getX() * settings.getGridSize(), getY() * settings.getGridSize());
+        window.draw(pinkyShape);
     }
 };
 
@@ -396,7 +404,7 @@ public:
     Inky() {};
     ~Inky() {};
     Inky(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
-    void InkyMove(Pacman pacman, Map map, Ghost blinky) {
+    void InkyMove(Pacman pacman, Map map, Ghost blinky, GameSettings settings, RenderWindow &window) {
         int a = pacman.getX(), b = pacman.getY();
         switch (pacman.getNextDirection())
         {
@@ -416,6 +424,10 @@ public:
         a = blinky.getX() + 2 * (a - blinky.getX());
         b = blinky.getY() + 2 * (b - blinky.getY());
         move(map, a, b);
+        RectangleShape inkyShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
+        inkyShape.setFillColor(settings.getInkyColor());
+        inkyShape.setPosition(getX() * settings.getGridSize(), getY() * settings.getGridSize());
+        window.draw(inkyShape);
     }
 };
 
@@ -426,7 +438,7 @@ public:
     Clyde() {};
     ~Clyde() {};
     Clyde(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
-    void ClydeMove(Pacman pacman, Map map) {
+    void ClydeMove(Pacman pacman, Map map, GameSettings settings, RenderWindow &window) {
         int a, b;
         float mainDistance = distance(pacman.getX(), pacman.getY(), x, y);
         if (mainDistance > 8)
@@ -440,7 +452,12 @@ public:
             b = map.getH();
         }
         move(map, a, b);
+        RectangleShape clydeShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
+        clydeShape.setFillColor(settings.getClydeColor());
+        clydeShape.setPosition(getX() * settings.getGridSize(), getY() * settings.getGridSize());
+        window.draw(clydeShape);
     }
+
     int Lose(Pacman& pacman, Blinky& blinky, Pinky& pinky, Inky& inky)
     {
         int result = 1;
@@ -542,8 +559,8 @@ public:
 
 int main()
 {
-    Food smallFood(10, 5, 'o');
-    Food bigFood(0, 10, 'O');
+    Food smallFood(240, 5, 'o');
+    Food bigFood(4, 10, 'O');
     GameSettings settings(750, 875, "Pac-Man", 20, 20, 10, 25, 14, 26,sf::Color::Yellow, sf::Color::Blue, sf::Color::White, sf::Color::White, sf::Color::Red, sf::Color(255, 185, 193), sf::Color::Cyan, sf::Color(255, 165, 0));
     Map map(35, 30);
     map.createMap();
@@ -574,18 +591,6 @@ int main()
     Result.setFillColor(sf::Color::White);
     Result.setPosition(5 * settings.getGridSize(), 10 * settings.getGridSize());
 
-    RectangleShape blinkyShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
-    blinkyShape.setFillColor(settings.getBlinkyColor());
-
-    RectangleShape pinkyShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
-    pinkyShape.setFillColor(settings.getPinkyColor());
-
-    RectangleShape inkyShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
-    inkyShape.setFillColor(settings.getInkyColor());
-
-    RectangleShape clydeShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
-    clydeShape.setFillColor(settings.getClydeColor());
-
     RenderWindow window(VideoMode(settings.getScreenWidth(), settings.getScreenHeight()), settings.getWindowTitle());
     while (window.isOpen())
     {
@@ -598,20 +603,11 @@ int main()
         window.clear(Color::Black);
         if (!(pacman.WonOrLost(smallFood, bigFood, Result)))
         {
-            blinky.BlinkyMove(pacman, map);
-            pinky.PinkyMove(pacman, map);
-            inky.InkyMove(pacman, map, blinky);
-            clyde.ClydeMove(pacman, map);
-            pinkyShape.setPosition(pinky.getX() * settings.getGridSize(), pinky.getY() * settings.getGridSize());
-            blinkyShape.setPosition(blinky.getX() * settings.getGridSize(), blinky.getY() * settings.getGridSize());
-            inkyShape.setPosition(inky.getX() * settings.getGridSize(), inky.getY() * settings.getGridSize());
-            clydeShape.setPosition(clyde.getX() * settings.getGridSize(), clyde.getY() * settings.getGridSize());
-            window.draw(blinkyShape);
-            window.draw(pinkyShape);
-            window.draw(inkyShape);
-            window.draw(clydeShape);
-            pointsText.setString("Points " + std::to_string(pacman.getPoints()));
-            livesText.setString("Lives " + std::to_string(pacman.getLives()));
+            map.MasePaint(settings, window, smallFood, bigFood);
+            blinky.BlinkyMove(pacman, map, settings, window);
+            pinky.PinkyMove(pacman, map, settings, window);
+            inky.InkyMove(pacman, map, blinky, settings, window);
+            clyde.ClydeMove(pacman, map, settings, window);
             window.draw(pointsText);
             window.draw(livesText);
             if (!(clyde.Lose(pacman, blinky, pinky, inky)))
@@ -630,7 +626,6 @@ int main()
                 pacman.setNextDirection(3);
             }
             pacman.move(map, smallFood, bigFood);
-            map.MasePaint(settings, window, smallFood, bigFood);
             if (pacman.WonOrLost(smallFood, bigFood, Result))
             {
                 sf::FloatRect textBounds = Result.getLocalBounds();
@@ -638,6 +633,8 @@ int main()
                 Result.setPosition((windowSize.x - textBounds.width) / 2, (windowSize.y - textBounds.height) / 2 - 50);
                 window.draw(Result);
             }
+            pointsText.setString("Points " + std::to_string(pacman.getPoints()));
+            livesText.setString("Lives " + std::to_string(pacman.getLives()));
             window.display();
         }
     }
