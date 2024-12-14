@@ -465,15 +465,15 @@ public:
             pacman.loseLife();
             result = 0;
         }
-        if (pacman.getX() == pinky.getX() && pacman.getY() == pinky.getY()) {
+        else if (pacman.getX() == pinky.getX() && pacman.getY() == pinky.getY()) {
             pacman.loseLife();
             result = 0;
         }
-        if (pacman.getX() == inky.getX() && pacman.getY() == inky.getY()) {
+        else if (pacman.getX() == inky.getX() && pacman.getY() == inky.getY()) {
             pacman.loseLife();
             result = 0;
         }
-        if (pacman.getX() == getX() && pacman.getY()  == getY()) {
+        else if (pacman.getX() == getX() && pacman.getY()  == getY()) {
             pacman.loseLife();
             result = 0;
         }
@@ -483,15 +483,15 @@ public:
                 pacman.loseLife();
                 result = 0;
             }
-            if (pacman.getX() == pinky.getX() && pacman.getY() - 1 == pinky.getY()) {
+            else if (pacman.getX() == pinky.getX() && pacman.getY() - 1 == pinky.getY()) {
                 pacman.loseLife();
                 result = 0;
             }
-            if (pacman.getX() == inky.getX() && pacman.getY() - 1 == inky.getY()) {
+            else if (pacman.getX() == inky.getX() && pacman.getY() - 1 == inky.getY()) {
                 pacman.loseLife();
                 result = 0;
             }
-            if (pacman.getX() == getX() && pacman.getY() - 1 == getY()) {
+            else if (pacman.getX() == getX() && pacman.getY() - 1 == getY()) {
                 pacman.loseLife();
                 result = 0;
             }
@@ -501,15 +501,15 @@ public:
                 pacman.loseLife();
                 result = 0;
             }
-            if (pacman.getX() == pinky.getX() && pacman.getY() + 1 == pinky.getY()) {
+            else if (pacman.getX() == pinky.getX() && pacman.getY() + 1 == pinky.getY()) {
                 pacman.loseLife();
                 result = 0;
             }
-            if (pacman.getX() == inky.getX() && pacman.getY() + 1 == inky.getY()) {
+            else if (pacman.getX() == inky.getX() && pacman.getY() + 1 == inky.getY()) {
                 pacman.loseLife();
                 result = 0;
             }
-            if (pacman.getX() == getX() && pacman.getY() + 1 == getY()) {
+            else if (pacman.getX() == getX() && pacman.getY() + 1 == getY()) {
                 pacman.loseLife();
                 result = 0;
             }
@@ -519,15 +519,15 @@ public:
                 pacman.loseLife();
                 result = 0;
             }
-            if (pacman.getX() -1 == pinky.getX() && pacman.getY() == pinky.getY()) {
+            else if (pacman.getX() -1 == pinky.getX() && pacman.getY() == pinky.getY()) {
                 pacman.loseLife();
                 result = 0;
             }
-            if (pacman.getX()-1 == inky.getX() && pacman.getY() == inky.getY()) {
+            else if (pacman.getX()-1 == inky.getX() && pacman.getY() == inky.getY()) {
                 pacman.loseLife();
                 result = 0;
             }
-            if (pacman.getX() - 1 == getX() && pacman.getY() == getY()) {
+            else if (pacman.getX() - 1 == getX() && pacman.getY() == getY()) {
                 pacman.loseLife();
                 result = 0;
             }
@@ -537,15 +537,15 @@ public:
                 pacman.loseLife();
                 result = 0;
             }
-            if (pacman.getX()+1 == pinky.getX() && pacman.getY() == pinky.getY()) {
+            else if (pacman.getX()+1 == pinky.getX() && pacman.getY() == pinky.getY()) {
                 pacman.loseLife();
                 result = 0;
             }
-            if (pacman.getX()+1 == inky.getX() && pacman.getY() == inky.getY()) {
+            else if (pacman.getX()+1 == inky.getX() && pacman.getY() == inky.getY()) {
                 pacman.loseLife();
                 result = 0;
             }
-            if (pacman.getX()+1 == getX() && pacman.getY() == getY()) {
+            else if (pacman.getX()+1 == getX() && pacman.getY() == getY()) {
                 pacman.loseLife();
                 result = 0;
             }
@@ -554,8 +554,6 @@ public:
         return result;
     }
 };
-
-
 
 int main()
 {
@@ -608,8 +606,6 @@ int main()
             pinky.PinkyMove(pacman, map, settings, window);
             inky.InkyMove(pacman, map, blinky, settings, window);
             clyde.ClydeMove(pacman, map, settings, window);
-            window.draw(pointsText);
-            window.draw(livesText);
             if (!(clyde.Lose(pacman, blinky, pinky, inky)))
             {
                 blinky.setAll(11, 14, 0, 3, 3);
@@ -635,6 +631,8 @@ int main()
             }
             pointsText.setString("Points " + std::to_string(pacman.getPoints()));
             livesText.setString("Lives " + std::to_string(pacman.getLives()));
+            window.draw(pointsText);
+            window.draw(livesText);
             window.display();
         }
     }
