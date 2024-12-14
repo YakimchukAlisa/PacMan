@@ -5,15 +5,68 @@
 
 using namespace sf;
 
+class GameSettings {
+private:
+    int screenWidth;
+    int screenHeight;
+    std::string windowTitle;
+    int pacmanSize;
+    int ghostSize;
+    int foodSize;
+    sf::Color pacmanColor;
+    sf::Color squareColor;
+    sf::Color circleColor;
+    sf::Color circle2Color;
+    sf::Color blinkyColor;
+    sf::Color pinkyColor;
+    sf::Color inkyColor;
+    sf::Color clydeColor;
+    int gridSize;
+    int pacmanStartX;
+    int pacmanStartY;
+
+public:
+    GameSettings() {};
+    GameSettings(int screenWidth, int screenHeight, std::string windowTitle,
+        int pacmanSize, int ghostSize, int foodSize, int gridSize,
+        int pacmanStartX, int pacmanStartY,
+        sf::Color pacmanColor, sf::Color squareColor, sf::Color circleColor,
+        sf::Color circle2Color, sf::Color blinkyColor, sf::Color pinkyColor,
+        sf::Color inkyColor, sf::Color clydeColor) :screenWidth(screenWidth), screenHeight(screenHeight), windowTitle(windowTitle), pacmanSize(pacmanSize), ghostSize(ghostSize), foodSize(foodSize), gridSize(gridSize),
+        pacmanStartX(pacmanStartX), pacmanStartY(pacmanStartY), pacmanColor(pacmanColor), squareColor(squareColor), circleColor(circleColor), circle2Color(circle2Color), blinkyColor(blinkyColor), pinkyColor(pinkyColor), 
+        inkyColor(inkyColor), clydeColor(clydeColor) {};
+
+    int getScreenWidth() const { return screenWidth; }
+    int getScreenHeight() const { return screenHeight; }
+    std::string getWindowTitle() const { return windowTitle; }
+    int getPacmanSize() const { return pacmanSize; }
+    int getGhostSize() const { return ghostSize; }
+    int getFoodSize() const { return foodSize; }
+    int getGridSize() const { return gridSize; }
+    int getPacmanStartX() const { return pacmanStartX; }
+    int getPacmanStartY() const { return pacmanStartY; }
+    sf::Color getPacmanColor() const { return pacmanColor; }
+    sf::Color getSquareColor() const { return squareColor; }
+    sf::Color getCircleColor() const { return circleColor; }
+    sf::Color getCircle2Color() const { return circle2Color; }
+    sf::Color getBlinkyColor() const { return blinkyColor; }
+    sf::Color getPinkyColor() const { return pinkyColor; }
+    sf::Color getInkyColor() const { return inkyColor; }
+    sf::Color getClydeColor() const { return clydeColor; }
+};
+
+
 class Food {
 private:
-    int count, point;
+    int count;
+    int point;
     char type;
 public:
-    Food(int count, int point, char type) {};
-    int getCount() const { return count; }
-    int getPoint() const { return point; }
-    char getType() const { return type; }
+    Food() {};
+    Food(int count, int point, char type) : count(count), point(point), type(type) {};
+    int getCount() { return count; }
+    int getPoint()  { return point; }
+    char getType() { return type; }
     void decreaseCount() { count--; }
 };
 
@@ -22,11 +75,11 @@ private:
     int H, W;
     std::string Mase[100];
 public:
-    Map(int H, int W) {};
+    Map(int H, int W) : H(H), W(W) {};
     int getH() const { return H; }
     int getW() const { return W; }
-    char getTile(int y, int x) const { return (y >= 0 && y < H && x >= 0 && x < W) ? Mase[y][x] : 'X'; }
-    void setTile(int y, int x, char tile) { if (y >= 0 && y < H && x >= 0 && x < W) Mase[y][x] = tile; }
+    char getTile(int y, int x) const { return  Mase[y][x]; }
+    void setTile(int y, int x, char tile) { Mase[y][x] = tile; }
 
     void createMap() {
         std::string tempMase[100] = {
@@ -66,11 +119,12 @@ public:
             " XXXXXXXXXXXXXXXXXXXXXXXXXXXX ",
             "                              ",
         };
-        for (int i = 0; i < 100; ++i) {
+        for (int i = 0; i < H; ++i) {
             Mase[i] = tempMase[i];
         }
     }
-    void MasePaint(GameSettings settings, RenderWindow& window, Food smallFood, Food bigFood) {
+
+    void MasePaint(GameSettings& settings, RenderWindow& window, Food& smallFood, Food& bigFood) {
         RectangleShape square(Vector2f(settings.getGridSize(), settings.getGridSize()));
         square.setFillColor(settings.getSquareColor());
         CircleShape circle(3);
@@ -108,65 +162,29 @@ public:
     }
 };
 
-class GameSettings {
-private:
-    int screenWidth;
-    int screenHeight;
-    std::string windowTitle;
-    int pacmanSize;
-    int ghostSize;
-    int foodSize;
-    sf::Color pacmanColor;
-    sf::Color squareColor;
-    sf::Color circleColor;
-    sf::Color circle2Color;
-    sf::Color blinkyColor;
-    sf::Color pinkyColor;
-    sf::Color inkyColor;
-    sf::Color clydeColor;
-    int gridSize;
-    int pacmanStartX;
-    int pacmanStartY;
-
-public:
-    GameSettings(int screenWidth, int screenHeight, std::string windowTitle,
-        int pacmanSize, int ghostSize, int foodSize, int gridSize,
-        int pacmanStartX, int pacmanStartY,
-        sf::Color pacmanColor, sf::Color squareColor, sf::Color circleColor,
-        sf::Color circle2Color, sf::Color blinkyColor, sf::Color pinkyColor,
-        sf::Color inkyColor, sf::Color clydeColor) {}
-
-    int getScreenWidth() const { return screenWidth; }
-    int getScreenHeight() const { return screenHeight; }
-    std::string getWindowTitle() const { return windowTitle; }
-    int getPacmanSize() const { return pacmanSize; }
-    int getGhostSize() const { return ghostSize; }
-    int getFoodSize() const { return foodSize; }
-    int getGridSize() const { return gridSize; }
-    int getPacmanStartX() const { return pacmanStartX; }
-    int getPacmanStartY() const { return pacmanStartY; }
-    sf::Color getPacmanColor() const { return pacmanColor; }
-    sf::Color getSquareColor() const { return squareColor; }
-    sf::Color getCircleColor() const { return circleColor; }
-    sf::Color getCircle2Color() const { return circle2Color; }
-    sf::Color getBlinkyColor() const { return blinkyColor; }
-    sf::Color getPinkyColor() const { return pinkyColor; }
-    sf::Color getInkyColor() const { return inkyColor; }
-    sf::Color getClydeColor() const { return clydeColor; }
-};
-
 class Pacman {
 private:
     int x, y, nextX, nextY, score, nextDirection, lives, points;
 public:
-    Pacman(int x, int y, int NextX, int nextY, int score, int nextDirection, int lives, int points) {};
+    Pacman() {};
+    Pacman(int x, int y, int nextX, int nextY, int score, int nextDirection, int lives, int points) : x(x), y(y), nextX(nextX), nextY(nextY), score(score), nextDirection(nextDirection), lives(lives), points(points) {};
     int getX() const { return x; }
     int getY() const { return y; }
+    int getStartX() const { return 14; }
+    int getStartY() const { return 26; }
     int getPoints() const { return points; }
     int getLives() const { return lives; }
     int getNextDirection() const { return nextDirection; }
+    void setX(int a) { x = a; }
+    void setY(int a) { y = a; }
+    void setNextX(int a) { nextX = a; }
+    void setNextY(int a) { nextY = a; }
+    void setScore(int a) { score = a; }
+    void setNextDirection(int a) { nextDirection = a; }
     void loseLife() { lives--; }
-    void move(Map map, Food smallFood, Food bigFood) {
+    void addPoints(int p) { points += p; }
+
+    void move(Map &map, Food& smallFood, Food& bigFood) {
         if (Keyboard::isKeyPressed(Keyboard::Up) && map.getTile(nextY - 1, nextX) != 'X' && !(nextY == 17 && nextX == 0 || nextY == 17 && nextX == map.getW() - 1)) {
         nextDirection = 0;
         nextX = x;
@@ -198,7 +216,6 @@ public:
                 nextY--;
             break;
         case 1:
-
             if (map.getTile(nextY + 1,nextX) != 'X' && nextY + 1 <= 35)
                 nextY++;
             break;
@@ -222,12 +239,12 @@ public:
     {
         if (map.getTile(nextY,nextX) == smallFood.getType())
         {
-            points += smallFood.getPoint();
+            addPoints(smallFood.getPoint());
             smallFood.decreaseCount();
         }
         if (map.getTile(nextY,nextX) == bigFood.getType())
         {
-            points += bigFood.getType();
+            addPoints(bigFood.getType());
             bigFood.decreaseCount();
         }
         map.setTile(y, x, ' ');
@@ -236,21 +253,6 @@ public:
         y = nextY;
     }
 }
-
-    int Lose(Ghost blinky, Ghost pinky, Ghost inky, Ghost clyde)
-    {
-        int f = 1;
-        if (x == blinky.getX() && y == blinky.getY() || x + 1 == blinky.getX() && y== blinky.getY() || x - 1 == blinky.getX() && y == blinky.getY() || x == blinky.getX() && y + 1 == blinky.getY() || x == blinky.getX() && y - 1 == blinky.getX())
-            loseLife();
-        else if (x == pinky.getX() && y == pinky.getY() || x + 1 == pinky.getX() && y == pinky.getY() || x - 1 == pinky.getX() && y == pinky.getY() || x == pinky.getX() && y + 1 == pinky.getY() || x == pinky.getX() && y - 1 == pinky.getY())
-            loseLife();
-        else if (x == inky.getX() && y == inky.getY() || x + 1 == inky.getX() && y == inky.getY() || x - 1 == inky.getX() && y == inky.getY() || x == inky.getX() && y + 1 == inky.getY() || x == inky.getX() && y - 1 == inky.getY())
-            loseLife();
-        else if (x == clyde.getX() && y == clyde.getY() || x + 1 == clyde.getX() && y == clyde.getY() || x - 1 == clyde.getX() && y == clyde.getY() || x == clyde.getX() && y + 1 == clyde.getY() || x == clyde.getX() && y - 1 == clyde.getY())
-            loseLife();
-        else f = 0;
-        return f;
-    }
 
     int WonOrLost(Food smallFood, Food bigFood, Text& Result)
     {
@@ -264,16 +266,18 @@ public:
     }
 };
 
-class Ghost: public Pacman {
+class Ghost {
 private:
     int x, y, score, direction, lastDirection;
 public:
-    Ghost(int x, int y, int score, int direction, int lastDirection) {};
+    Ghost() {};
+    Ghost(int x, int y, int score, int direction, int lastDirection): x(x), y(y), score(score), direction(direction),lastDirection(lastDirection) {};
     int getX() const { return x; }
     int getY() const { return y; }
     int getScore() const { return score; }
     int getDirection() const { return direction; }
     int getLAstDirection() const { return lastDirection; }
+    void setAll(int a, int b, int c, int d, int e) { x = a, y = b, score = c, d = direction, e = lastDirection; }
 
     float distance(int x1, int y1, int x2, int y2) {
         return (sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2)));
@@ -343,11 +347,27 @@ public:
         if (lastDirection != direction && change)
             lastDirection = direction;
     }
+};
 
+class Blinky : public Ghost {
+private:
+    int x, y, score, direction, lastDirection;
+public:
+    Blinky() {};
+    ~Blinky() {};
+    Blinky(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
     void BlinkyMove(Pacman pacman, Map map) {
         move(map, pacman.getX(), pacman.getY());
     }
+};
 
+class Pinky : public Ghost {
+private:
+    int x, y, score, direction, lastDirection;
+public:
+    Pinky() {};
+    ~Pinky() {};
+    Pinky(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
     void PinkyMove(Pacman pacman, Map map) {
         int a = pacman.getX(), b = pacman.getY();
         switch (pacman.getNextDirection())
@@ -367,29 +387,45 @@ public:
         }
         move(map, a, b);
     }
+};
 
+class Inky : public Ghost {
+private:
+    int x, y, score, direction, lastDirection;
+public:
+    Inky() {};
+    ~Inky() {};
+    Inky(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
     void InkyMove(Pacman pacman, Map map, Ghost blinky) {
         int a = pacman.getX(), b = pacman.getY();
         switch (pacman.getNextDirection())
         {
         case 0:
-            y = y - 2;
+            b = b - 2;
             break;
         case 1:
-            y = y + 2;
+            b = b + 2;
             break;
         case 2:
-            x = x - 2;
+            a = a - 2;
             break;
         case 3:
-            x = x + 2;
+            a = a + 2;
             break;
         }
         a = blinky.getX() + 2 * (a - blinky.getX());
         b = blinky.getY() + 2 * (b - blinky.getY());
         move(map, a, b);
     }
+};
 
+class Clyde : public Ghost {
+private:
+    int x, y, score, direction, lastDirection;
+public:
+    Clyde() {};
+    ~Clyde() {};
+    Clyde(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
     void ClydeMove(Pacman pacman, Map map) {
         int a, b;
         float mainDistance = distance(pacman.getX(), pacman.getY(), x, y);
@@ -405,22 +441,205 @@ public:
         }
         move(map, a, b);
     }
+    int Lose(Pacman& pacman, Blinky& blinky, Pinky& pinky, Inky& inky)
+    {
+        int result = 1;
+        if (pacman.getX() == blinky.getX() && pacman.getY() == blinky.getY()) {
+            pacman.loseLife();
+            result = 0;
+        }
+        if (pacman.getX() == pinky.getX() && pacman.getY() == pinky.getY()) {
+            pacman.loseLife();
+            result = 0;
+        }
+        if (pacman.getX() == inky.getX() && pacman.getY() == inky.getY()) {
+            pacman.loseLife();
+            result = 0;
+        }
+        if (pacman.getX() == getX() && pacman.getY()  == getY()) {
+            pacman.loseLife();
+            result = 0;
+        }
+        switch (pacman.getNextDirection()) {
+        case 0:
+            if (pacman.getX() == blinky.getX() && pacman.getY() - 1 == blinky.getY()) {
+                pacman.loseLife();
+                result = 0;
+            }
+            if (pacman.getX() == pinky.getX() && pacman.getY() - 1 == pinky.getY()) {
+                pacman.loseLife();
+                result = 0;
+            }
+            if (pacman.getX() == inky.getX() && pacman.getY() - 1 == inky.getY()) {
+                pacman.loseLife();
+                result = 0;
+            }
+            if (pacman.getX() == getX() && pacman.getY() - 1 == getY()) {
+                pacman.loseLife();
+                result = 0;
+            }
+            break;
+        case 1:
+            if (pacman.getX() == blinky.getX() && pacman.getY() + 1 == blinky.getY()) {
+                pacman.loseLife();
+                result = 0;
+            }
+            if (pacman.getX() == pinky.getX() && pacman.getY() + 1 == pinky.getY()) {
+                pacman.loseLife();
+                result = 0;
+            }
+            if (pacman.getX() == inky.getX() && pacman.getY() + 1 == inky.getY()) {
+                pacman.loseLife();
+                result = 0;
+            }
+            if (pacman.getX() == getX() && pacman.getY() + 1 == getY()) {
+                pacman.loseLife();
+                result = 0;
+            }
+            break;
+        case 2:
+            if (pacman.getX() -1 == blinky.getX() && pacman.getY() == blinky.getY()) {
+                pacman.loseLife();
+                result = 0;
+            }
+            if (pacman.getX() -1 == pinky.getX() && pacman.getY() == pinky.getY()) {
+                pacman.loseLife();
+                result = 0;
+            }
+            if (pacman.getX()-1 == inky.getX() && pacman.getY() == inky.getY()) {
+                pacman.loseLife();
+                result = 0;
+            }
+            if (pacman.getX() - 1 == getX() && pacman.getY() == getY()) {
+                pacman.loseLife();
+                result = 0;
+            }
+            break;
+        case 3:
+            if (pacman.getX()+1 == blinky.getX() && pacman.getY() == blinky.getY()) {
+                pacman.loseLife();
+                result = 0;
+            }
+            if (pacman.getX()+1 == pinky.getX() && pacman.getY() == pinky.getY()) {
+                pacman.loseLife();
+                result = 0;
+            }
+            if (pacman.getX()+1 == inky.getX() && pacman.getY() == inky.getY()) {
+                pacman.loseLife();
+                result = 0;
+            }
+            if (pacman.getX()+1 == getX() && pacman.getY() == getY()) {
+                pacman.loseLife();
+                result = 0;
+            }
+            break;
+        }
+        return result;
+    }
 };
-
-  
- 
-
-
 
 
 
 int main()
 {
-    GameSettings settings(800, 600, "Pac-Man", 20, 20, 10, 25, 14, 26,sf::Color::Yellow, sf::Color::Blue, sf::Color::White, sf::Color::White, sf::Color::Red, sf::Color(255, 185, 193), sf::Color::Cyan, sf::Color(255, 165, 0));
+    Food smallFood(10, 5, 'o');
+    Food bigFood(0, 10, 'O');
+    GameSettings settings(750, 875, "Pac-Man", 20, 20, 10, 25, 14, 26,sf::Color::Yellow, sf::Color::Blue, sf::Color::White, sf::Color::White, sf::Color::Red, sf::Color(255, 185, 193), sf::Color::Cyan, sf::Color(255, 165, 0));
     Map map(35, 30);
+    map.createMap();
     Pacman pacman(14, 26, 14, 26, 0, 3, 3, 0);
-    Ghost Blinky(11, 14, 0, 3, 3), Pinky(13, 14, 0, 3, 3), Inky(15, 14, 0, 3, 3), Clyde(17, 14, 0, 3, 3);
-    Food smallFood(240, 5, 'o'), bigFood(4, 10, 'O');
+    Blinky blinky(11, 14, 0, 3, 3);
+    Pinky pinky(13, 14, 0, 3, 3);
+    Inky inky(15, 14, 0, 3, 3);
+    Clyde clyde(17, 14, 0, 3, 3);
+    sf::Font font;
+    if (!font.loadFromFile("Unformital Medium.ttf")) {
+        return EXIT_FAILURE;
+    }
+    sf::Text pointsText;
+    pointsText.setFont(font);
+    pointsText.setCharacterSize(40);
+    pointsText.setFillColor(sf::Color::White);
+    pointsText.setPosition(2 * settings.getGridSize(), 1 * settings.getGridSize());
+
+    sf::Text livesText;
+    livesText.setFont(font);
+    livesText.setCharacterSize(40);
+    livesText.setFillColor(sf::Color::White);
+    livesText.setPosition(22 * settings.getGridSize(), 1 * settings.getGridSize());
+
+    sf::Text Result;
+    Result.setFont(font);
+    Result.setCharacterSize(80);
+    Result.setFillColor(sf::Color::White);
+    Result.setPosition(5 * settings.getGridSize(), 10 * settings.getGridSize());
+
+    RectangleShape blinkyShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
+    blinkyShape.setFillColor(settings.getBlinkyColor());
+
+    RectangleShape pinkyShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
+    pinkyShape.setFillColor(settings.getPinkyColor());
+
+    RectangleShape inkyShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
+    inkyShape.setFillColor(settings.getInkyColor());
+
+    RectangleShape clydeShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
+    clydeShape.setFillColor(settings.getClydeColor());
+
     RenderWindow window(VideoMode(settings.getScreenWidth(), settings.getScreenHeight()), settings.getWindowTitle());
+    while (window.isOpen())
+    {
+        Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == Event::Closed)
+                window.close();
+        }
+        window.clear(Color::Black);
+        if (!(pacman.WonOrLost(smallFood, bigFood, Result)))
+        {
+            blinky.BlinkyMove(pacman, map);
+            pinky.PinkyMove(pacman, map);
+            inky.InkyMove(pacman, map, blinky);
+            clyde.ClydeMove(pacman, map);
+            pinkyShape.setPosition(pinky.getX() * settings.getGridSize(), pinky.getY() * settings.getGridSize());
+            blinkyShape.setPosition(blinky.getX() * settings.getGridSize(), blinky.getY() * settings.getGridSize());
+            inkyShape.setPosition(inky.getX() * settings.getGridSize(), inky.getY() * settings.getGridSize());
+            clydeShape.setPosition(clyde.getX() * settings.getGridSize(), clyde.getY() * settings.getGridSize());
+            window.draw(blinkyShape);
+            window.draw(pinkyShape);
+            window.draw(inkyShape);
+            window.draw(clydeShape);
+            pointsText.setString("Points " + std::to_string(pacman.getPoints()));
+            livesText.setString("Lives " + std::to_string(pacman.getLives()));
+            window.draw(pointsText);
+            window.draw(livesText);
+            if (!(clyde.Lose(pacman, blinky, pinky, inky)))
+            {
+                blinky.setAll(11, 14, 0, 3, 3);
+                pinky.setAll(13, 14, 0, 3, 3);
+                inky.setAll(15, 14, 0, 3, 3);
+                clyde.setAll(17, 14, 0, 3, 3);
+                map.setTile(pacman.getY(), pacman.getX(), ' ');
+                map.setTile(26, 14, 'P');
+                pacman.setX(pacman.getStartX());
+                pacman.setY(pacman.getStartY());
+                pacman.setNextX(pacman.getStartX());
+                pacman.setNextY(pacman.getStartY());
+                pacman.setScore(0);
+                pacman.setNextDirection(3);
+            }
+            pacman.move(map, smallFood, bigFood);
+            map.MasePaint(settings, window, smallFood, bigFood);
+            if (pacman.WonOrLost(smallFood, bigFood, Result))
+            {
+                sf::FloatRect textBounds = Result.getLocalBounds();
+                sf::Vector2u windowSize = window.getSize();
+                Result.setPosition((windowSize.x - textBounds.width) / 2, (windowSize.y - textBounds.height) / 2 - 50);
+                window.draw(Result);
+            }
+            window.display();
+        }
+    }
     return 0;
 }
