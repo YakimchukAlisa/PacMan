@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 #include <cmath>
+#include <vector>
 #include <math.h>
 
 using namespace sf;
@@ -10,8 +11,8 @@ private:
     std::string windowTitle;
     sf::Color pacmanColor;
     sf::Color squareColor;
-    sf::Color circleColor;
-    sf::Color circle2Color;
+    sf::Color smallCircleColor;
+    sf::Color biglCircleColor;
     sf::Color blinkyColor;
     sf::Color pinkyColor;
     sf::Color inkyColor;
@@ -21,29 +22,28 @@ private:
     int pacmanStartY;
 
 public:
-    GameSettings() {};
+    ~GameSettings() {};
+    GameSettings() {}
     GameSettings(std::string windowTitle,int gridSize,
         int pacmanStartX, int pacmanStartY,
-        sf::Color pacmanColor, sf::Color squareColor, sf::Color circleColor,
-        sf::Color circle2Color, sf::Color blinkyColor, sf::Color pinkyColor,
+        sf::Color pacmanColor, sf::Color squareColor, sf::Color smallCircleColor,
+        sf::Color biglCircleColor, sf::Color blinkyColor, sf::Color pinkyColor,
         sf::Color inkyColor, sf::Color clydeColor) : windowTitle(windowTitle), gridSize(gridSize),
-        pacmanStartX(pacmanStartX), pacmanStartY(pacmanStartY), pacmanColor(pacmanColor), squareColor(squareColor), circleColor(circleColor), circle2Color(circle2Color), blinkyColor(blinkyColor), pinkyColor(pinkyColor), 
-        inkyColor(inkyColor), clydeColor(clydeColor) {};
-
+        pacmanStartX(pacmanStartX), pacmanStartY(pacmanStartY), pacmanColor(pacmanColor), squareColor(squareColor), smallCircleColor(smallCircleColor), 
+        biglCircleColor(biglCircleColor), blinkyColor(blinkyColor), pinkyColor(pinkyColor), inkyColor(inkyColor), clydeColor(clydeColor) {};
     std::string getWindowTitle() const { return windowTitle; }
     int getGridSize() const { return gridSize; }
     int getPacmanStartX() const { return pacmanStartX; }
     int getPacmanStartY() const { return pacmanStartY; }
     sf::Color getPacmanColor() const { return pacmanColor; }
     sf::Color getSquareColor() const { return squareColor; }
-    sf::Color getCircleColor() const { return circleColor; }
-    sf::Color getCircle2Color() const { return circle2Color; }
+    sf::Color getCircleColor() const { return smallCircleColor; }
+    sf::Color getCircle2Color() const { return biglCircleColor; }
     sf::Color getBlinkyColor() const { return blinkyColor; }
     sf::Color getPinkyColor() const { return pinkyColor; }
     sf::Color getInkyColor() const { return inkyColor; }
     sf::Color getClydeColor() const { return clydeColor; }
 };
-
 
 class Food {
 private:
@@ -51,7 +51,7 @@ private:
     int point;
     char type;
 public:
-    Food() {};
+    ~Food() {};
     Food(int count, int point, char type) : count(count), point(point), type(type) {};
     int getCount() { return count; }
     int getPoint()  { return point; }
@@ -62,16 +62,17 @@ public:
 class Map {
 private:
     int H, W;
-    std::string Mase[100];
+    std::vector<std::string> Mase;
 public:
-    Map(int H, int W) : H(H), W(W) {};
+    ~Map() {};
+    Map(int H, int W) : H(H), W(W) { Mase.resize(H); }
     int getH() const { return H; }
     int getW() const { return W; }
     char getTile(int y, int x) const { return  Mase[y][x]; }
     void setTile(int y, int x, char tile) { Mase[y][x] = tile; }
 
     void createMap() {
-        std::string tempMase[100] = {
+        std::string tempMase[] = {
             "                              ",
             "                              ",
             "                              ",
@@ -116,10 +117,10 @@ public:
     void MasePaint(GameSettings& settings, RenderWindow& window, Food& smallFood, Food& bigFood) {
         RectangleShape square(Vector2f(settings.getGridSize(), settings.getGridSize()));
         square.setFillColor(settings.getSquareColor());
-        CircleShape circle(3);
-        circle.setFillColor(settings.getCircleColor());
-        CircleShape circle2(6);
-        circle2.setFillColor(settings.getCircle2Color());
+        CircleShape smallCircle(3);
+        smallCircle.setFillColor(settings.getCircleColor());
+        CircleShape biglCircle(6);
+        biglCircle.setFillColor(settings.getCircle2Color());
         RectangleShape pacman(Vector2f(settings.getGridSize(), settings.getGridSize()));
         pacman.setFillColor(settings.getPacmanColor());
         for (int i = 0; i < H; i++)
@@ -132,15 +133,15 @@ public:
                 }
                 else if (Mase[i][j] == smallFood.getType())
                 {
-                    circle.setPosition(j * settings.getGridSize() + 8.5, i * settings.getGridSize() + 8.5f);
+                    smallCircle.setPosition(j * settings.getGridSize() + 8.5, i * settings.getGridSize() + 8.5f);
                     int pacmanX = static_cast<int>(pacman.getPosition().y / settings.getGridSize());
                     int pacmanCol = static_cast<int>(pacman.getPosition().x / settings.getGridSize());
-                    window.draw(circle);
+                    window.draw(smallCircle);
                 }
                 else if (Mase[i][j] == bigFood.getType())
                 {
-                    circle2.setPosition(j * settings.getGridSize() + 5.5f, i * settings.getGridSize() + 5.5f);
-                    window.draw(circle2);
+                    biglCircle.setPosition(j * settings.getGridSize() + 5.5f, i * settings.getGridSize() + 5.5f);
+                    window.draw(biglCircle);
                 }
                 else if (Mase[i][j] == 'P')
                 {
@@ -155,7 +156,7 @@ class Pacman {
 private:
     int x, y, nextX, nextY, score, nextDirection, lives, points;
 public:
-    Pacman() {};
+    ~Pacman() {};
     Pacman(int x, int y, int nextX, int nextY, int score, int nextDirection, int lives, int points) : x(x), y(y), nextX(nextX), nextY(nextY), score(score), nextDirection(nextDirection), lives(lives), points(points) {};
     int getX() const { return x; }
     int getY() const { return y; }
@@ -194,7 +195,7 @@ public:
     }
 
     score++;
-    if (score >= 200)
+    if (score >= 150)
     {
         switch (nextDirection)
         {
@@ -257,7 +258,8 @@ class Ghost {
 private:
     int x, y, score, direction, lastDirection;
 public:
-    Ghost() {};
+    Ghost();
+    ~Ghost() {};
     Ghost(int x, int y, int score, int direction, int lastDirection): x(x), y(y), score(score), direction(direction),lastDirection(lastDirection) {};
     int getX() const { return x; }
     int getY() const { return y; }
@@ -310,7 +312,7 @@ public:
         }
 
         score++;
-        if (score >= 200)
+        if (score >= 150)
         {
             change = 1;
             // Двигаемся в выбранном направлении
@@ -348,7 +350,6 @@ class Blinky : public Ghost {
 private:
     int x, y, score, direction, lastDirection;
 public:
-    Blinky() {};
     ~Blinky() {};
     Blinky(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
     void BlinkyMove(Pacman pacman, Map map, GameSettings settings, RenderWindow &window) {
@@ -361,7 +362,6 @@ class Pinky : public Ghost {
 private:
     int x, y, score, direction, lastDirection;
 public:
-    Pinky() {};
     ~Pinky() {};
     Pinky(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
     void PinkyMove(Pacman pacman, Map map, GameSettings settings, RenderWindow& window) {
@@ -390,7 +390,6 @@ class Inky : public Ghost {
 private:
     int x, y, score, direction, lastDirection;
 public:
-    Inky() {};
     ~Inky() {};
     Inky(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
     void InkyMove(Pacman pacman, Map map, Ghost blinky, GameSettings settings, RenderWindow &window) {
@@ -421,7 +420,6 @@ class Clyde : public Ghost {
 private:
     int x, y, score, direction, lastDirection;
 public:
-    Clyde() {};
     ~Clyde() {};
     Clyde(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
     void ClydeMove(Pacman pacman, Map map, GameSettings settings, RenderWindow &window) {
@@ -540,28 +538,22 @@ public:
 
 int main()
 {
-    Food smallFood(10, 5, 'o');
-    Food bigFood(0, 10, 'O');
+    Food smallFood(242, 5, 'o');
+    Food bigFood(4, 10, 'O');
     Map map(35, 30);
     //динамический массив объектов класса GameSettings 
     GameSettings* settingsArray;
     settingsArray = new GameSettings[2];
-    settingsArray[0] = GameSettings("Pac-Man 1", 25, 14, 26, sf::Color::Yellow, sf::Color::Blue, sf::Color::White, sf::Color::White, sf::Color::Red, sf::Color(255, 185, 193), sf::Color::Cyan, sf::Color(255, 165, 0));
-    settingsArray[1] = GameSettings("Pac-Man 1", 25, 14, 8,
-        sf::Color(255, 255, 153),  // pacman - Мягкий желтый (чуть насыщеннее)
-        sf::Color(100, 149, 247),  // wall -  Средний голубой (не совсем блеклый)
-        sf::Color(255, 245, 238),  // pellet - Светло-желтый (мягче, но не бледный)
-        sf::Color(255, 228, 225), // power pellet - Светло-персиковый (мягче белого)
-        sf::Color(220, 20, 60),  // ghost1 - Розовый (мягче красного, но не блеклый)
-        sf::Color(255, 105, 180), // ghost2 - Темно-розовый (не совсем блеклый)
-        sf::Color(176, 234, 240), // ghost3 -  Сине-серый (не блеклый)
-        sf::Color(255, 140, 0)  // ghost4 - Насыщенный оранжевый (не бледный)
+    settingsArray[0] = GameSettings("Pac-Man 1", 25, 14, 26, sf::Color::Yellow, sf::Color::Blue, sf::Color::White, sf::Color::White, sf::Color::Red, sf::Color(255, 185, 193), 
+        sf::Color::Cyan, sf::Color(255, 165, 0));
+    settingsArray[1] = GameSettings("Pac-Man 1", 25, 14, 8, sf::Color(255, 255, 153), sf::Color(100, 149, 247), sf::Color(255, 245, 238),  
+        sf::Color(255, 228, 225),  sf::Color(220, 20, 60), sf::Color(255, 105, 180), sf::Color(176, 234, 240), sf::Color(255, 140, 0)  
     );
     srand(time(NULL));
     GameSettings settings = settingsArray[rand()%2];
     map.createMap();
     //Mассив динамических объектов класса Ghost
-    Pacman pacman(settings.getPacmanStartX(), settings.getPacmanStartY(), settings.getPacmanStartX(), settings.getPacmanStartY(), 0, 3, 1, 0);
+    Pacman pacman(settings.getPacmanStartX(), settings.getPacmanStartY(), settings.getPacmanStartX(), settings.getPacmanStartY(), 0, 3, 3, 0);
     Ghost** ghostArray = new Ghost * [4];
     ghostArray[0] = new Blinky(11, 14, 0, 3, 3);
     ghostArray[1] = new Pinky(13, 14, 0, 3, 3);
@@ -580,19 +572,16 @@ int main()
     pointsText.setCharacterSize(40);
     pointsText.setFillColor(sf::Color::White);
     pointsText.setPosition(2 * settings.getGridSize(), 1 * settings.getGridSize());
-
     sf::Text livesText;
     livesText.setFont(font);
     livesText.setCharacterSize(40);
     livesText.setFillColor(sf::Color::White);
     livesText.setPosition(22 * settings.getGridSize(), 1 * settings.getGridSize());
-
     sf::Text Result;
     Result.setFont(font);
     Result.setCharacterSize(80);
     Result.setFillColor(sf::Color::White);
     Result.setPosition(5 * settings.getGridSize(), 10 * settings.getGridSize());
-
     RenderWindow window(VideoMode(settings.getGridSize() * map.getW(), settings.getGridSize() * map.getH()), settings.getWindowTitle());
     while (window.isOpen())
     {
@@ -624,20 +613,23 @@ int main()
             clyde.ClydeMove(pacman, map, settings, window);
             if (clyde.Lose(pacman, blinky, pinky, inky))
             {
-                blinky.setAll(11, 14, 0, 3, 3);
-                pinky.setAll(13, 14, 0, 3, 3);
-                inky.setAll(15, 14, 0, 3, 3);
-                clyde.setAll(17, 14, 0, 3, 3);
-                map.setTile(pacman.getY(), pacman.getX(), ' ');
-                map.setTile(settings.getPacmanStartY(), settings.getPacmanStartX(), 'P');
-                pacman.setX(settings.getPacmanStartX());
-                pacman.setY(settings.getPacmanStartY());
-                pacman.setNextX(settings.getPacmanStartX());
-                pacman.setNextY(settings.getPacmanStartY());
-                pacman.setScore(0);
-                pacman.setNextDirection(3);
+                if (pacman.getLives())
+                {
+                    blinky.setAll(11, 14, 0, 3, 3);
+                    pinky.setAll(13, 14, 0, 3, 3);
+                    inky.setAll(15, 14, 0, 3, 3);
+                    clyde.setAll(17, 14, 0, 3, 3);
+                    map.setTile(pacman.getY(), pacman.getX(), ' ');
+                    map.setTile(settings.getPacmanStartY(), settings.getPacmanStartX(), 'P');
+                    pacman.setX(settings.getPacmanStartX());
+                    pacman.setY(settings.getPacmanStartY());
+                    pacman.setNextX(settings.getPacmanStartX());
+                    pacman.setNextY(settings.getPacmanStartY());
+                    pacman.setScore(0);
+                    pacman.setNextDirection(3);
+                }
             }
-            pointsText.setString("Points " + std::to_string(pacman.getPoints()));
+            pointsText.setString("Score " + std::to_string(pacman.getPoints()));
             livesText.setString("Lives " + std::to_string(pacman.getLives()));
             window.draw(pointsText);
             window.draw(livesText);
