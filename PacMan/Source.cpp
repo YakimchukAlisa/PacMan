@@ -270,6 +270,14 @@ public:
         return (sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2)));
     }
 
+    void ghostDraw(sf::Color color, RenderWindow& window, GameSettings settings)
+    {
+        RectangleShape ghostShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
+        ghostShape.setFillColor(color);
+        ghostShape.setPosition(getX() * settings.getGridSize(), getY() * settings.getGridSize());
+        window.draw(ghostShape);
+    }
+
     void move(Map map, int goalX, int goalY) {
         float distanceUp, distanceDown, distanceLeft, distanceRight;
         double minDistance = INFINITY;
@@ -345,10 +353,7 @@ public:
     Blinky(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
     void BlinkyMove(Pacman pacman, Map map, GameSettings settings, RenderWindow &window) {
         move(map, pacman.getX(), pacman.getY());
-        RectangleShape blinkyShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
-        blinkyShape.setFillColor(settings.getBlinkyColor());
-        blinkyShape.setPosition(getX() * settings.getGridSize(), getY() * settings.getGridSize());
-        window.draw(blinkyShape);
+        ghostDraw(settings.getBlinkyColor(), window, settings);
     }
 };
 
@@ -377,10 +382,7 @@ public:
             break;
         }
         move(map, a, b);
-        RectangleShape pinkyShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
-        pinkyShape.setFillColor(settings.getPinkyColor());
-        pinkyShape.setPosition(getX() * settings.getGridSize(), getY() * settings.getGridSize());
-        window.draw(pinkyShape);
+        ghostDraw(settings.getPinkyColor(), window, settings);
     }
 };
 
@@ -411,10 +413,7 @@ public:
         a = blinky.getX() + 2 * (a - blinky.getX());
         b = blinky.getY() + 2 * (b - blinky.getY());
         move(map, a, b);
-        RectangleShape inkyShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
-        inkyShape.setFillColor(settings.getInkyColor());
-        inkyShape.setPosition(getX() * settings.getGridSize(), getY() * settings.getGridSize());
-        window.draw(inkyShape);
+        ghostDraw(settings.getInkyColor(), window, settings);
     }
 };
 
@@ -439,102 +438,99 @@ public:
             b = map.getH();
         }
         move(map, a, b);
-        RectangleShape clydeShape(Vector2f(settings.getGridSize(), settings.getGridSize()));
-        clydeShape.setFillColor(settings.getClydeColor());
-        clydeShape.setPosition(getX() * settings.getGridSize(), getY() * settings.getGridSize());
-        window.draw(clydeShape);
+        ghostDraw(settings.getClydeColor(), window, settings);
     }
 
     int Lose(Pacman& pacman, Blinky& blinky, Pinky& pinky, Inky& inky)
     {
-        int result = 1;
+        int result = 0;
         if (pacman.getX() == blinky.getX() && pacman.getY() == blinky.getY()) {
             pacman.loseLife();
-            result = 0;
+            result = 1;
         }
         else if (pacman.getX() == pinky.getX() && pacman.getY() == pinky.getY()) {
             pacman.loseLife();
-            result = 0;
+            result = 1;
         }
         else if (pacman.getX() == inky.getX() && pacman.getY() == inky.getY()) {
             pacman.loseLife();
-            result = 0;
+            result = 1;
         }
         else if (pacman.getX() == getX() && pacman.getY()  == getY()) {
             pacman.loseLife();
-            result = 0;
+            result = 1;
         }
         switch (pacman.getNextDirection()) {
         case 0:
             if (pacman.getX() == blinky.getX() && pacman.getY() - 1 == blinky.getY()) {
                 pacman.loseLife();
-                result = 0;
+                result = 1;
             }
             else if (pacman.getX() == pinky.getX() && pacman.getY() - 1 == pinky.getY()) {
                 pacman.loseLife();
-                result = 0;
+                result = 1;
             }
             else if (pacman.getX() == inky.getX() && pacman.getY() - 1 == inky.getY()) {
                 pacman.loseLife();
-                result = 0;
+                result = 1;
             }
             else if (pacman.getX() == getX() && pacman.getY() - 1 == getY()) {
                 pacman.loseLife();
-                result = 0;
+                result = 1;
             }
             break;
         case 1:
             if (pacman.getX() == blinky.getX() && pacman.getY() + 1 == blinky.getY()) {
                 pacman.loseLife();
-                result = 0;
+                result = 1;
             }
             else if (pacman.getX() == pinky.getX() && pacman.getY() + 1 == pinky.getY()) {
                 pacman.loseLife();
-                result = 0;
+                result = 1;
             }
             else if (pacman.getX() == inky.getX() && pacman.getY() + 1 == inky.getY()) {
                 pacman.loseLife();
-                result = 0;
+                result = 1;
             }
             else if (pacman.getX() == getX() && pacman.getY() + 1 == getY()) {
                 pacman.loseLife();
-                result = 0;
+                result = 1;
             }
             break;
         case 2:
             if (pacman.getX() -1 == blinky.getX() && pacman.getY() == blinky.getY()) {
                 pacman.loseLife();
-                result = 0;
+                result = 1;
             }
             else if (pacman.getX() -1 == pinky.getX() && pacman.getY() == pinky.getY()) {
                 pacman.loseLife();
-                result = 0;
+                result = 1;
             }
             else if (pacman.getX()-1 == inky.getX() && pacman.getY() == inky.getY()) {
                 pacman.loseLife();
-                result = 0;
+                result = 1;
             }
             else if (pacman.getX() - 1 == getX() && pacman.getY() == getY()) {
                 pacman.loseLife();
-                result = 0;
+                result = 1;
             }
             break;
         case 3:
             if (pacman.getX()+1 == blinky.getX() && pacman.getY() == blinky.getY()) {
                 pacman.loseLife();
-                result = 0;
+                result = 1;
             }
             else if (pacman.getX()+1 == pinky.getX() && pacman.getY() == pinky.getY()) {
                 pacman.loseLife();
-                result = 0;
+                result = 1;
             }
             else if (pacman.getX()+1 == inky.getX() && pacman.getY() == inky.getY()) {
                 pacman.loseLife();
-                result = 0;
+                result = 1;
             }
             else if (pacman.getX()+1 == getX() && pacman.getY() == getY()) {
                 pacman.loseLife();
-                result = 0;
+                result = 1;
             }
             break;
         }
@@ -544,8 +540,8 @@ public:
 
 int main()
 {
-    Food smallFood(242, 5, 'o');
-    Food bigFood(4, 10, 'O');
+    Food smallFood(10, 5, 'o');
+    Food bigFood(0, 10, 'O');
     Map map(35, 30);
     //динамический массив объектов класса GameSettings 
     GameSettings* settingsArray;
@@ -565,7 +561,7 @@ int main()
     GameSettings settings = settingsArray[rand()%2];
     map.createMap();
     //Mассив динамических объектов класса Ghost
-    Pacman pacman(settings.getPacmanStartX(), settings.getPacmanStartY(), settings.getPacmanStartX(), settings.getPacmanStartY(), 0, 3, 5, 0);
+    Pacman pacman(settings.getPacmanStartX(), settings.getPacmanStartY(), settings.getPacmanStartX(), settings.getPacmanStartY(), 0, 3, 1, 0);
     Ghost** ghostArray = new Ghost * [4];
     ghostArray[0] = new Blinky(11, 14, 0, 3, 3);
     ghostArray[1] = new Pinky(13, 14, 0, 3, 3);
@@ -607,14 +603,26 @@ int main()
                 window.close();
         }
         window.clear(Color::Black);
-        if (!(pacman.WonOrLost(smallFood, bigFood, Result)))
+        map.MasePaint(settings, window, smallFood, bigFood);
+        if (pacman.WonOrLost(smallFood, bigFood, Result))
         {
-            map.MasePaint(settings, window, smallFood, bigFood);
+            blinky.ghostDraw(settings.getBlinkyColor(), window, settings);
+            pinky.ghostDraw(settings.getPinkyColor(), window, settings);
+            inky.ghostDraw(settings.getInkyColor(), window, settings);
+            clyde.ghostDraw(settings.getClydeColor(), window, settings);
+            sf::FloatRect textBounds = Result.getLocalBounds();
+            sf::Vector2u windowSize = window.getSize();
+            Result.setPosition((windowSize.x - textBounds.width) / 2, (windowSize.y - textBounds.height) / 2 - 50);
+            window.draw(Result);
+        }
+        else
+        {
+            pacman.move(map, smallFood, bigFood);
             blinky.BlinkyMove(pacman, map, settings, window);
             pinky.PinkyMove(pacman, map, settings, window);
             inky.InkyMove(pacman, map, blinky, settings, window);
             clyde.ClydeMove(pacman, map, settings, window);
-            if (!(clyde.Lose(pacman, blinky, pinky, inky)))
+            if (clyde.Lose(pacman, blinky, pinky, inky))
             {
                 blinky.setAll(11, 14, 0, 3, 3);
                 pinky.setAll(13, 14, 0, 3, 3);
@@ -629,21 +637,16 @@ int main()
                 pacman.setScore(0);
                 pacman.setNextDirection(3);
             }
-            pacman.move(map, smallFood, bigFood);
-            if (pacman.WonOrLost(smallFood, bigFood, Result))
-            {
-                sf::FloatRect textBounds = Result.getLocalBounds();
-                sf::Vector2u windowSize = window.getSize();
-                Result.setPosition((windowSize.x - textBounds.width) / 2, (windowSize.y - textBounds.height) / 2 - 50);
-                window.draw(Result);
-            }
             pointsText.setString("Points " + std::to_string(pacman.getPoints()));
             livesText.setString("Lives " + std::to_string(pacman.getLives()));
             window.draw(pointsText);
             window.draw(livesText);
-            window.display();
         }
+        window.display();
     }
     delete[] settingsArray;
+    for (int i = 0; i < 4; ++i)
+        delete ghostArray[i];
+    delete[] ghostArray;
     return 0;
 }
