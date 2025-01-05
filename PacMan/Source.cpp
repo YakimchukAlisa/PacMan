@@ -168,6 +168,8 @@ public:
     void setNextX(int a) { nextX = a; }
     void setNextY(int a) { nextY = a; }
     void setScore(int a) { score = a; }
+    void setLives(int a) { lives = a; }
+    void setPoints(int a) { points = a; }
     void setNextDirection(int a) { nextDirection = a; }
     void loseLife() { lives--; }
     void addPoints(int p) { points += p; }
@@ -258,7 +260,7 @@ class Ghost {
 private:
     int x, y, score, direction, lastDirection;
 public:
-    Ghost();
+    Ghost() {};
     ~Ghost() {};
     Ghost(int x, int y, int score, int direction, int lastDirection): x(x), y(y), score(score), direction(direction),lastDirection(lastDirection) {};
     int getX() const { return x; }
@@ -351,6 +353,7 @@ private:
     int x, y, score, direction, lastDirection;
 public:
     ~Blinky() {};
+    Blinky() {};
     Blinky(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
     void BlinkyMove(Pacman pacman, Map map, GameSettings settings, RenderWindow &window) {
         move(map, pacman.getX(), pacman.getY());
@@ -363,6 +366,7 @@ private:
     int x, y, score, direction, lastDirection;
 public:
     ~Pinky() {};
+    Pinky() {};
     Pinky(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
     void PinkyMove(Pacman pacman, Map map, GameSettings settings, RenderWindow& window) {
         int a = pacman.getX(), b = pacman.getY();
@@ -391,6 +395,7 @@ private:
     int x, y, score, direction, lastDirection;
 public:
     ~Inky() {};
+    Inky() {};
     Inky(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
     void InkyMove(Pacman pacman, Map map, Ghost blinky, GameSettings settings, RenderWindow &window) {
         int a = pacman.getX(), b = pacman.getY();
@@ -421,6 +426,7 @@ private:
     int x, y, score, direction, lastDirection;
 public:
     ~Clyde() {};
+    Clyde() {};
     Clyde(int x, int y, int score, int direction, int lastDirection) : Ghost(x, y, score, direction, lastDirection) {};
     void ClydeMove(Pacman pacman, Map map, GameSettings settings, RenderWindow &window) {
         int a, b;
@@ -536,25 +542,65 @@ public:
     }
 };
 
+
+void resetGame(Map& map, Food& smallFood, Food& bigFood, Pacman& pacman, Ghost** ghostArray, GameSettings& settings, Text& Result) {
+    // Сброс карты
+   
+    map.createMap();
+
+    // Сброс еды
+    smallFood = Food(242, 5, 'o');
+    bigFood = Food(4, 10, 'O');
+
+    // Сброс Pacman
+    pacman.setX(settings.getPacmanStartX());
+    pacman.setY(settings.getPacmanStartY());
+    pacman.setNextX(settings.getPacmanStartX());
+    pacman.setNextY(settings.getPacmanStartY());
+    pacman.setScore(0);
+    pacman.setNextDirection(3);
+    pacman.setScore(0);
+    pacman.setLives(3);
+    pacman.setPoints(0);
+
+
+    // Сброс приведений
+     //Ghost** ghostArray = new Ghost * [4];
+    Blinky& blinky = *static_cast<Blinky*>(ghostArray[0]);
+    Pinky& pinky = *static_cast<Pinky*>(ghostArray[1]);
+    Inky& inky = *static_cast<Inky*>(ghostArray[2]);
+    Clyde& clyde = *static_cast<Clyde*>(ghostArray[3]);
+    blinky.setAll(11, 14, 0, 3, 3);
+    pinky.setAll(13, 14, 0, 3, 3);
+    inky.setAll(15, 14, 0, 3, 3);
+    clyde.setAll(17, 14, 0, 3, 3);
+    map.setTile(pacman.getY(), pacman.getX(), ' ');
+    map.setTile(settings.getPacmanStartY(), settings.getPacmanStartX(), 'P');
+    Result.setString(" ");
+}
+
+
 int main()
 {
-    Food smallFood(242, 5, 'o');
-    Food bigFood(4, 10, 'O');
-    Map map(35, 30);
     //динамический массив объектов класса GameSettings 
     GameSettings* settingsArray;
     settingsArray = new GameSettings[2];
-    settingsArray[0] = GameSettings("Pac-Man 1", 25, 14, 26, sf::Color::Yellow, sf::Color::Blue, sf::Color::White, sf::Color::White, sf::Color::Red, sf::Color(255, 185, 193), 
+    settingsArray[0] = GameSettings("Pac-Man 1", 25, 14, 26, sf::Color::Yellow, sf::Color::Blue, sf::Color::White, sf::Color::White, sf::Color::Red, sf::Color(255, 185, 193),
         sf::Color::Cyan, sf::Color(255, 165, 0));
-    settingsArray[1] = GameSettings("Pac-Man 1", 25, 14, 8, sf::Color(255, 255, 153), sf::Color(100, 149, 247), sf::Color(255, 245, 238),  
-        sf::Color(255, 228, 225),  sf::Color(220, 20, 60), sf::Color(255, 105, 180), sf::Color(176, 234, 240), sf::Color(255, 140, 0)  
+    settingsArray[1] = GameSettings("Pac-Man 1", 25, 14, 8, sf::Color(255, 255, 153), sf::Color(100, 149, 247), sf::Color(255, 245, 238),
+        sf::Color(255, 228, 225), sf::Color(220, 20, 60), sf::Color(255, 105, 180), sf::Color(176, 234, 240), sf::Color(255, 140, 0)
     );
     srand(time(NULL));
-    GameSettings settings = settingsArray[rand()%2];
-    map.createMap();
-    //Mассив динамических объектов класса Ghost
+    GameSettings settings = settingsArray[rand() % 2];
+
     Pacman pacman(settings.getPacmanStartX(), settings.getPacmanStartY(), settings.getPacmanStartX(), settings.getPacmanStartY(), 0, 3, 3, 0);
     Ghost** ghostArray = new Ghost * [4];
+    Map map(35, 30);
+    map.createMap();
+    Food smallFood(242, 5, 'o');
+    Food bigFood(4, 10, 'O');
+
+    //Mассив динамических объектов класса Ghost
     ghostArray[0] = new Blinky(11, 14, 0, 3, 3);
     ghostArray[1] = new Pinky(13, 14, 0, 3, 3);
     ghostArray[2] = new Inky(15, 14, 0, 3, 3);
@@ -590,6 +636,9 @@ int main()
         {
             if (event.type == Event::Closed)
                 window.close();
+            if (event.type == Event::KeyPressed && event.key.code == sf::Keyboard::Enter) {
+                resetGame(map, smallFood, bigFood, pacman, ghostArray, settings, Result);
+            }
         }
         window.clear(Color::Black);
         map.MasePaint(settings, window, smallFood, bigFood);
@@ -629,11 +678,11 @@ int main()
                     pacman.setNextDirection(3);
                 }
             }
-            pointsText.setString("Score " + std::to_string(pacman.getPoints()));
-            livesText.setString("Lives " + std::to_string(pacman.getLives()));
-            window.draw(pointsText);
-            window.draw(livesText);
         }
+        pointsText.setString("Score " + std::to_string(pacman.getPoints()));
+        livesText.setString("Lives " + std::to_string(pacman.getLives()));
+        window.draw(pointsText);
+        window.draw(livesText);
         window.display();
     }
     delete[] settingsArray;
